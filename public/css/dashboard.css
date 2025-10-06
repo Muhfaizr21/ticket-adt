@@ -1,0 +1,132 @@
+/* Dashboard Specific Styles - Clean White Theme */
+
+/* Enhanced Card Animations */
+.sidebar-card, .info-section, .event-card {
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.sidebar-card:hover, .info-section:hover, .event-card:hover {
+    box-shadow: var(--box-shadow-hover);
+}
+
+.btn-ticket:hover, .btn-event:hover, .btn-view-map:hover {
+    transform: translateY(-1px);
+}
+
+/* Image Hover Effects */
+.main-image, .small-image, .event-image {
+    position: relative;
+    overflow: hidden;
+}
+
+.main-image img, .small-image img, .event-image img {
+    transition: transform 0.5s ease;
+}
+
+.main-image:hover img, .small-image:hover img {
+    transform: scale(1.05);
+}
+
+/* Rating Stars Enhancement */
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.stars i {
+    font-size: 1.1rem;
+    transition: var(--transition);
+}
+
+.stars:hover i {
+    transform: scale(1.1);
+}
+
+/* Ticket Option Selection */
+.ticket-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.ticket-option.selected {
+    border-color: var(--primary-color);
+    background: #f0f7ff;
+}
+
+/* Loading Animation for Images */
+.image-loading {
+    background: linear-gradient(90deg, #f8fafc 25%, #e2e8f0 50%, #f8fafc 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Smooth Scroll Behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Focus States for Accessibility */
+.btn-action:focus,
+.btn-ticket:focus,
+.btn-event:focus,
+.filter-select:focus {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .topbar,
+    .btn-action,
+    .btn-ticket,
+    .btn-event,
+    .btn-view-map {
+        display: none !important;
+    }
+    
+    .main-content {
+        padding-top: 0;
+    }
+    
+    .festival-details {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .image-gallery {
+        display: none;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .btn-action,
+    .btn-ticket,
+    .btn-event {
+        border-width: 2px;
+    }
+    
+    .section-title::after {
+        height: 4px;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
