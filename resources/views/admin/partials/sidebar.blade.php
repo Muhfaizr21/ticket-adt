@@ -28,14 +28,14 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link {{ request()->is('admin/ticket-orders*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.orders.index') }}" class="menu-link {{ request()->is('admin/orders*') ? 'active' : '' }}">
                         <i class="bi bi-ticket-perforated menu-icon"></i>
                         <span class="menu-text">Ticket Orders</span>
                         <span class="menu-badge">8</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link {{ request()->is('admin/customers*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.customers.index') }}" class="menu-link {{ request()->is('admin/customers*') ? 'active' : '' }}">
                         <i class="bi bi-people-fill menu-icon"></i>
                         <span class="menu-text">Customers</span>
                     </a>
@@ -47,7 +47,7 @@
             <div class="menu-title">Management</div>
             <ul class="menu-items">
                 <li class="menu-item">
-                    <a href="#" class="menu-link {{ request()->is('admin/ticket-types*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ticket-types.index') }}" class="menu-link {{ request()->is('admin/ticket-types*') ? 'active' : '' }}">
                         <i class="bi bi-tags-fill menu-icon"></i>
                         <span class="menu-text">Ticket Types</span>
                     </a>

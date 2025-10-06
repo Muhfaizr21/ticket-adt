@@ -9,10 +9,12 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\AdminEventController;
-use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\EventController as AdminEventController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\Tickets\TicketTypeController;
 
-
+// Welcome
 Route::get('/welcome', function () {
     return view('welcome');
 });
@@ -30,8 +32,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
-
-    // New Routes for Topbar Navigation
     Route::get('/shop', [ShopController::class, 'index'])->name('shop');
     Route::get('/help', [HelpController::class, 'index'])->name('help');
     Route::get('/news', [NewsController::class, 'index'])->name('news');
@@ -39,28 +39,15 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Protected Routes - Admin
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::resource('events', AdminEventController::class);
+    Route::resource('orders', OrderController::class);
 });
-
-Route::middleware(['auth', 'isAdmin'])->group(function () {
-    Route::resource('/admin/events', AdminEventController::class)->names([
-        'index' => 'admin.events.index',
-        'create' => 'admin.events.create',
-        'store' => 'admin.events.store',
-        'edit' => 'admin.events.edit',
-        'update' => 'admin.events.update',
-        'destroy' => 'admin.events.destroy',
-    ]);
+//customers
+Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('customers', CustomerController::class)->only(['index', 'show']);
 });
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('events', AdminEventController::class);
+    Route::resource('ticket-types', TicketTypeController::class);
 });
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('events', EventController::class);
-});
-Route::resource('events', EventController::class);
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('events', App\Http\Controllers\Admin\EventController::class);
-});
-
