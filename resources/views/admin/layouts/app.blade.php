@@ -15,12 +15,12 @@
     <div class="admin-layout">
         <!-- Sidebar -->
         @include('admin.partials.sidebar')
-        
+
         <!-- Main Content -->
         <div class="main-content">
             <!-- Topbar -->
             @include('admin.partials.topbar')
-            
+
             <!-- Content Wrapper -->
             <div class="content-wrapper">
                 @yield('content')
@@ -33,29 +33,29 @@
         document.addEventListener('DOMContentLoaded', function() {
             const menuToggle = document.querySelector('.menu-toggle');
             const sidebar = document.querySelector('.sidebar');
-            
+
             if (menuToggle) {
                 menuToggle.addEventListener('click', function() {
                     sidebar.classList.toggle('mobile-open');
                 });
             }
-            
+
             // User dropdown
             const userMenu = document.querySelector('.user-menu');
             const dropdownMenu = document.querySelector('.dropdown-menu');
-            
+
             if (userMenu && dropdownMenu) {
                 userMenu.addEventListener('click', function(e) {
                     e.stopPropagation();
                     dropdownMenu.classList.toggle('show');
                 });
-                
+
                 // Close dropdown when clicking outside
                 document.addEventListener('click', function() {
                     dropdownMenu.classList.remove('show');
                 });
             }
-            
+
             // Close mobile sidebar when clicking on menu item
             const menuLinks = document.querySelectorAll('.menu-link');
             menuLinks.forEach(link => {
@@ -77,7 +77,7 @@
             });
         });
     </script>
-    
+
     @stack('scripts')
 </body>
 </html>
