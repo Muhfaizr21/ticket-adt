@@ -1,4 +1,4 @@
-@extends('admin.layouts.app') {{-- pastikan layout ini sesuai dengan file yang kamu pakai --}}
+@extends('admin.layouts.app')
 
 @section('content')
 <div class="container mt-4">
@@ -9,7 +9,7 @@
         </div>
 
         <div class="card-body">
-            <form action="{{ route('admin.events.store') }}" method="POST">
+            <form action="{{ route('admin.events.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-4">
                     {{-- Nama Event --}}
@@ -35,6 +35,16 @@
                         <label for="total_tickets" class="form-label fw-semibold">Jumlah Tiket</label>
                         <input type="number" name="total_tickets" id="total_tickets" class="form-control" placeholder="Contoh: 1000" required>
                     </div>
+
+                    {{-- Poster Event --}}
+                    <div class="col-md-6">
+                        <label for="poster" class="form-label fw-semibold">Poster Event</label>
+                        <input type="file" name="poster" id="poster" class="form-control" accept="image/*" required onchange="previewPoster(event)">
+                        <small class="text-muted">Format: JPG, JPEG, PNG</small>
+                        <div class="mt-3">
+                            <img id="preview" src="#" alt="Preview Poster" class="img-thumbnail d-none" style="max-height: 200px;">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="text-end mt-4">
@@ -44,4 +54,19 @@
         </div>
     </div>
 </div>
+
+<script>
+    function previewPoster(event) {
+        const preview = document.getElementById('preview');
+        const file = event.target.files[0];
+
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('d-none');
+        } else {
+            preview.src = '#';
+            preview.classList.add('d-none');
+        }
+    }
+</script>
 @endsection

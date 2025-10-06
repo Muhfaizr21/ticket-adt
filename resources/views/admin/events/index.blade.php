@@ -11,11 +11,12 @@
 </div>
 
 <div class="card shadow-sm border-0">
-    <div class="card-body">
+    <div class="card-body table-responsive">
         <table class="table table-hover align-middle text-center">
             <thead class="table-light">
                 <tr>
                     <th>#</th>
+                    <th>Poster</th>
                     <th>Nama Event</th>
                     <th>Harga Tiket</th>
                     <th>Total Tiket</th>
@@ -28,11 +29,26 @@
                 @forelse($events as $event)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
+
+                    {{-- Kolom Poster --}}
+                    <td>
+                        @if($event->poster)
+                            <img src="{{ asset('storage/' . $event->poster) }}" 
+                                 alt="Poster {{ $event->name }}" 
+                                 class="rounded shadow-sm" 
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                        @else
+                            <span class="text-muted fst-italic">Tidak ada</span>
+                        @endif
+                    </td>
+
                     <td class="fw-semibold">{{ $event->name }}</td>
                     <td>Rp {{ number_format($event->price, 0, ',', '.') }}</td>
                     <td>{{ $event->total_tickets }}</td>
                     <td>{{ $event->available_tickets }}</td>
                     <td>{{ $event->created_at->format('d M Y') }}</td>
+
+                    {{-- Tombol Aksi --}}
                     <td>
                         <a href="{{ route('admin.events.edit', $event->id) }}"
                            class="btn btn-sm btn-warning me-1" title="Edit Event">
@@ -54,7 +70,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
+                    <td colspan="8" class="text-center text-muted py-4">
                         <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
                         Belum ada event yang ditambahkan.
                     </td>

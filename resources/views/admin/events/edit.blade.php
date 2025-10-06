@@ -16,27 +16,44 @@
             @csrf
             @method('PUT')
 
+            {{-- Nama Event --}}
             <div class="mb-3">
                 <label class="form-label">Nama Event</label>
                 <input type="text" name="name" class="form-control" value="{{ old('name', $event->name) }}" required>
             </div>
 
+            {{-- Harga Tiket --}}
             <div class="mb-3">
-                <label class="form-label">Harga Tiket</label>
+                <label class="form-label">Harga Tiket (Rp)</label>
                 <input type="number" name="price" class="form-control" value="{{ old('price', $event->price) }}" required>
             </div>
 
+            {{-- Total Tiket --}}
             <div class="mb-3">
                 <label class="form-label">Total Tiket</label>
                 <input type="number" name="total_tickets" class="form-control" value="{{ old('total_tickets', $event->total_tickets) }}" required>
             </div>
 
+            {{-- Poster Event --}}
             <div class="mb-3">
                 <label class="form-label">Poster Event</label><br>
+
+                {{-- Poster Saat Ini --}}
                 @if($event->poster)
-                    <img src="{{ asset('storage/'.$event->poster) }}" width="120" class="rounded mb-2">
+                    <div class="mb-3">
+                        <p class="text-muted mb-1">Poster saat ini:</p>
+                        <img src="{{ asset('storage/' . $event->poster) }}" alt="Poster Event" class="rounded shadow-sm border" style="max-width: 250px;">
+                    </div>
                 @endif
-                <input type="file" name="poster" class="form-control">
+
+                {{-- Input Upload Baru --}}
+                <input type="file" name="poster" id="poster" class="form-control" accept="image/*" onchange="previewPoster(event)">
+                <small class="text-muted">Kosongkan jika tidak ingin mengganti poster.</small>
+
+                {{-- Preview Poster Baru --}}
+                <div class="mt-3">
+                    <img id="preview" src="#" alt="Preview Poster Baru" class="img-thumbnail d-none" style="max-height: 200px;">
+                </div>
             </div>
 
             <div class="text-end">
@@ -61,4 +78,19 @@ Swal.fire({
 });
 </script>
 @endif
+
+{{-- Preview Gambar Baru --}}
+<script>
+    function previewPoster(event) {
+        const preview = document.getElementById('preview');
+        const file = event.target.files[0];
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('d-none');
+        } else {
+            preview.src = '#';
+            preview.classList.add('d-none');
+        }
+    }
+</script>
 @endsection
