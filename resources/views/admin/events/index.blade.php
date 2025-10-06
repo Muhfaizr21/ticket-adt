@@ -16,6 +16,7 @@
             <thead class="table-light">
                 <tr>
                     <th>#</th>
+                    <th>Poster</th>
                     <th>Nama Event</th>
                     <th>Harga Tiket</th>
                     <th>Total Tiket</th>
@@ -28,6 +29,19 @@
                 @forelse($events as $event)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
+
+                    {{-- Poster Event --}}
+                    <td>
+                        @if($event->poster)
+                            <img src="{{ asset('storage/' . $event->poster) }}"
+                                 alt="Poster {{ $event->name }}"
+                                 class="rounded shadow-sm"
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                        @else
+                            <span class="text-muted fst-italic">Tidak ada</span>
+                        @endif
+                    </td>
+
                     <td class="fw-semibold">{{ $event->name }}</td>
                     <td>Rp {{ number_format($event->price, 0, ',', '.') }}</td>
                     <td>{{ $event->total_tickets }}</td>
