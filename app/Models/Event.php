@@ -28,13 +28,11 @@ class Event extends Model
 
     // Relasi ke Venue
     public function venue()
-{
-    return $this->belongsTo(Venue::class);
-}
-public function events()
-{
-    return $this->hasMany(Event::class);
-}
-
-
+    {
+        return $this->belongsTo(Venue::class);
+    }
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
 }

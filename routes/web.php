@@ -15,10 +15,12 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\Tickets\TicketTypeController;
 use App\Http\Controllers\Admin\VenueController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\PromotionController;
+use App\Http\Controllers\Admin\AdminProfileController;
+
 // Welcome
-Route::get('/welcome', function () {
-    return view('welcome');
-});
+Route::get('/welcome', fn() => view('welcome'));
 
 // Auth Routes
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
@@ -40,37 +42,44 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Protected Routes - Admin
-Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
+
     // Dashboard
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Events
     Route::resource('events', AdminEventController::class);
 
-    // Ticket Types (VIP & Reguler per event)
-    Route::resource('ticket-types', TicketTypeController::class)->except(['show', 'create', 'store', 'destroy']);
+    // Ticket Types
+    Route::resource('ticket-types', TicketTypeController::class)
+        ->except(['show', 'create', 'store', 'destroy']);
     Route::post('ticket-types/update-all', [TicketTypeController::class, 'updateAll'])->name('ticket-types.update-all');
-
 
     // Orders
     Route::resource('orders', OrderController::class);
 
     // Customers
     Route::resource('customers', CustomerController::class)->only(['index', 'show']);
-});
-// Promotions
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
-    Route::resource('promotions', \App\Http\Controllers\Admin\PromotionController::class);
-});
-// Venues
-Route::prefix('admin')->name('admin.')->group(function () {
+
+    // Promotions
+    Route::resource('promotions', PromotionController::class);
+
+    // Venues
     Route::resource('venues', VenueController::class);
-});
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('events', App\Http\Controllers\Admin\EventController::class);
-});
-// Reports
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
+
+    // Reports
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
+
+    // Settings - Index (overview)
+    Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::get('settings/edit', [SettingsController::class, 'edit'])->name('settings.edit');
+    Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::put('settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme.update');
+
+    // Profile Admin
+    Route::get('profile', [AdminProfileController::class, 'index'])->name('profile.index');
+    Route::put('profile', [AdminProfileController::class, 'update'])->name('profile.update');
+    Route::put('profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password.update');
+    Route::put('profile/avatar', [AdminProfileController::class, 'updateAvatar'])->name('profile.avatar.update'); // ✅ Tambahkan ini
 });
