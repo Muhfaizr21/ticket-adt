@@ -3,16 +3,12 @@
 @section('title', 'Edit Event')
 
 @section('content')
-<style>
-/* (Gunakan styling yang sama seperti sebelumnya, tidak saya ulangi agar ringkas) */
-</style>
-
-<div class="page-header d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-dark">Edit Event</h2>
-    <a href="{{ route('admin.events.index') }}" class="btn btn-secondary shadow-sm">
-        <i class="bi bi-arrow-left me-1"></i> Kembali
-    </a>
-</div>
+    <div class="page-header d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark">Edit Event</h2>
+        <a href="{{ route('admin.events.index') }}" class="btn btn-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-5">
@@ -39,59 +35,53 @@
                             @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                    {{-- Harga Tiket Default --}}
-                    <div class="mb-4">
-                        <label class="form-label">Harga Tiket Default (Rp)</label>
-                        <input type="number" name="price" class="form-control @error('price') is-invalid @enderror"
-                               value="{{ old('price', $event->price) }}" min="0">
-                        @error('price')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- VIP --}}
-                    <h5 class="mb-3 mt-4">VIP Ticket</h5>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Jumlah Tiket VIP</label>
-                            <input type="number" name="vip_tickets" class="form-control"
-                                   value="{{ old('vip_tickets', $event->vip_tickets ?? ceil($event->total_tickets * 0.3)) }}" min="0">
-                        </div>
-
                         {{-- Total Tiket --}}
                         <div class="mb-4">
-                            <label class="form-label">Total Tiket</label>
+                            <label class="form-label">Total Tiket <span class="text-danger">*</span></label>
                             <input type="number" name="total_tickets"
                                 class="form-control @error('total_tickets') is-invalid @enderror"
                                 value="{{ old('total_tickets', $event->total_tickets) }}" min="1" required>
                             @error('total_tickets') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
+
+                        {{-- Available Tickets --}}
+                        <div class="mb-4">
+                            <label class="form-label">Tiket Tersedia</label>
+                            <input type="number" class="form-control" value="{{ $event->available_tickets }}" readonly>
+                        </div>
+
+                        {{-- VIP Tickets (read-only) --}}
+                        <div class="mb-4">
+                            <label class="form-label">VIP Tickets</label>
+                            <input type="number" class="form-control" value="{{ $event->vip_tickets ?? 0 }}" readonly>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">VIP Price (Rp)</label>
+                            <input type="text" class="form-control"
+                                value="{{ $event->vip_price ? number_format($event->vip_price, 0, ',', '.') : '-' }}" readonly>
+                        </div>
+
+                        {{-- Reguler Tickets (read-only) --}}
+                        <div class="mb-4">
+                            <label class="form-label">Reguler Tickets</label>
+                            <input type="number" class="form-control" value="{{ $event->reguler_tickets ?? 0 }}" readonly>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Reguler Price (Rp)</label>
+                            <input type="text" class="form-control"
+                                value="{{ $event->reguler_price ? number_format($event->reguler_price, 0, ',', '.') : '-' }}"
+                                readonly>
+                        </div>
                     </div>
 
-                    {{-- Reguler --}}
-                    <h5 class="mb-3 mt-4">Reguler Ticket</h5>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Jumlah Tiket Reguler</label>
-                            <input type="number" name="reguler_tickets" class="form-control"
-                                   value="{{ old('reguler_tickets', $event->reguler_tickets ?? floor($event->total_tickets * 0.7)) }}" min="0">
+                    {{-- Kolom kanan --}}
+                    <div class="col-md-6">
+                        {{-- Tanggal Event --}}
+                        <div class="mb-4">
+                            <label class="form-label">Tanggal Event</label>
+                            <input type="date" name="date" class="form-control"
+                                value="{{ old('date', $event->date ? \Carbon\Carbon::parse($event->date)->format('Y-m-d') : '') }}">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Harga Tiket Reguler (Rp)</label>
-                            <input type="number" name="reguler_price" class="form-control"
-                                   value="{{ old('reguler_price', $event->reguler_price ?? $event->price) }}" min="0">
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Kanan: Tanggal, Lokasi, Poster --}}
-                <div class="col-md-6">
-                    {{-- Tanggal Event --}}
-                    <div class="mb-4">
-                        <label class="form-label">Tanggal Event</label>
-                        <input type="date" name="date" class="form-control"
-                               value="{{ old('date', $event->date ? \Carbon\Carbon::parse($event->date)->format('Y-m-d') : '') }}">
-                    </div>
 
                         {{-- Lokasi Event --}}
                         <div class="mb-4">
@@ -100,26 +90,54 @@
                                 value="{{ old('location', $event->location) }}" required>
                         </div>
 
-                    {{-- Poster --}}
-                    <div class="mb-4">
-                        <label class="form-label">Poster Event</label>
-                        @if($event->poster)
-                            <div class="poster-preview-container mb-2">
-                                <img src="{{ asset('storage/' . $event->poster) }}" alt="Poster Event" class="poster-preview">
-                            </div>
-                        @endif
-                        <input type="file" name="poster" class="form-control">
+                        {{-- Venue --}}
+                        <div class="mb-4">
+                            <label class="form-label">Venue</label>
+                            <select name="venue_id" class="form-control">
+                                <option value="">-- Pilih Venue --</option>
+                                @foreach($venues as $venue)
+                                    <option value="{{ $venue->id }}"
+                                        {{ old('venue_id', $event->venue_id ?? '') == $venue->id ? 'selected' : '' }}>
+                                        {{ $venue->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+
+                        {{-- Poster --}}
+                        <div class="mb-4">
+                            <label class="form-label">Poster Event</label>
+                            @if($event->poster)
+                                <div class="mb-2">
+                                    <img src="{{ asset('storage/' . $event->poster) }}" alt="Poster Event" width="120"
+                                        class="rounded">
+                                </div>
+                            @endif
+                            <input type="file" name="poster" class="form-control">
+                        </div>
+
+                        {{-- Created & Updated --}}
+                        <div class="mb-2">
+                            <label class="form-label">Dibuat Pada</label>
+                            <input type="text" class="form-control"
+                                value="{{ $event->created_at ? $event->created_at->format('d-m-Y H:i') : '-' }}" readonly>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Diperbarui Pada</label>
+                            <input type="text" class="form-control"
+                                value="{{ $event->updated_at ? $event->updated_at->format('d-m-Y H:i') : '-' }}" readonly>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {{-- Tombol Submit --}}
-            <div class="mt-4 pt-4 border-top">
-                <button type="submit" class="btn btn-submit">Update Info</button>
-                <a href="{{ route('admin.events.index') }}" class="btn btn-secondary ms-2">Batal</a>
-            </div>
+                {{-- Tombol Submit --}}
+                <div class="mt-4 pt-4 border-top">
+                    <button type="submit" class="btn btn-primary">Update Info</button>
+                    <a href="{{ route('admin.events.index') }}" class="btn btn-secondary ms-2">Batal</a>
+                </div>
 
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 @endsection
