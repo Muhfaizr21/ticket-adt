@@ -1,83 +1,139 @@
 @extends('admin.layouts.app')
 
 @section('content')
-<div class="container mt-4">
-    <h3 class="mb-4">🎫 Daftar Event</h3>
+<div class="container mt-5">
+    {{-- Header --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-calendar-event text-primary"></i> Daftar Event
+            </h3>
 
+        </div>
+        <a href="{{ route('admin.events.create') }}" class="btn btn-gradient shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Event
+        </a>
+    </div>
+
+    {{-- Alert sukses --}}
     @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    <a href="{{ route('admin.events.create') }}" class="btn btn-primary mb-3">+ Tambah Event</a>
+    {{-- Table --}}
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light border-bottom">
+                        <tr class="text-center text-secondary">
+                            <th>#</th>
+                            <th>Event</th>
+                            <th>Venue</th>
+                            <th>Tanggal</th>
+                            <th>Harga</th>
+                            <th>Tiket</th>
+                            <th>Poster</th>
+                            <th>Dibuat</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($events as $event)
+                            <tr>
+                                <td class="text-center text-muted">{{ $loop->iteration }}</td>
+                                <td>
+                                    <div class="fw-semibold text-dark">{{ $event->name }}</div>
+                                    <div class="text-muted small">{{ Str::limit($event->description, 50) }}</div>
+                                </td>
+                                <td class="text-center">
+                                    {{ optional($event->venue)->name ?? '-' }}
+                                </td>
+                                <td class="text-center">
+                                    {{ $event->date ? \Carbon\Carbon::parse($event->date)->translatedFormat('d F Y') : '-' }}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-gradient text-white px-3 py-2">
+                                        Rp{{ number_format($event->price, 0, ',', '.') }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge {{ $event->available_tickets > 0 ? 'bg-success' : 'bg-danger' }}">
+                                        {{ $event->available_tickets }} / {{ $event->total_tickets }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    @if ($event->poster)
+                                        <img src="{{ asset('storage/'.$event->poster) }}"
+                                             width="65" height="65"
+                                             class="rounded-3 shadow-sm object-fit-cover">
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td class="text-center text-muted small">
+                                    {{ $event->created_at?->format('d M Y, H:i') }}
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <a href="{{ route('admin.events.edit', $event->id) }}"
+                                           class="btn btn-sm btn-outline-primary" title="Edit Event">
+                                           <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <form action="{{ route('admin.events.destroy', $event->id) }}" method="POST"
+                                              onsubmit="return confirm('Yakin ingin menghapus event ini?')" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-sm btn-outline-danger" title="Hapus Event">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <i class="bi bi-emoji-frown text-muted fs-2"></i>
+                                    <p class="text-muted mt-2 mb-0">Belum ada event yang terdaftar.</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-    <table class="table table-bordered table-striped align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>Nama Event</th>
-                <th>Deskripsi</th>
-                <th>Venue</th>
-                <th>Tanggal</th>
-                <th>Harga</th>
-                <th>Total Tiket</th>
-                <th>Tiket Tersedia</th>
-                <th>VIP Tiket</th>
-                <th>VIP Harga</th>
-                <th>Reguler Tiket</th>
-                <th>Reguler Harga</th>
-                <th>Poster</th>
-                <th>Dibuat</th>
-                <th>Diperbarui</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($events as $event)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $event->name }}</td>
-                    <td>{{ $event->description ?? '-' }}</td>
-                    <td>{{ optional($event->venue)->name ?? '-' }}</td>
-                    <td>{{ $event->date ?? '-' }}</td>
-                    <td>Rp{{ number_format($event->price, 0, ',', '.') }}</td>
-                    <td>{{ $event->total_tickets }}</td>
-                    <td>{{ $event->available_tickets }}</td>
-                    <td>{{ $event->vip_tickets ?? '-' }}</td>
-                    <td>{{ $event->vip_price ? 'Rp'.number_format($event->vip_price,0,',','.') : '-' }}</td>
-                    <td>{{ $event->reguler_tickets ?? '-' }}</td>
-                    <td>{{ $event->reguler_price ? 'Rp'.number_format($event->reguler_price,0,',','.') : '-' }}</td>
-                    <td>
-                        @if ($event->poster)
-                            <img src="{{ asset('storage/'.$event->poster) }}" width="60" class="rounded">
-                        @else
-                            <span class="text-muted">Tidak ada</span>
-                        @endif
-                    </td>
-                    <td>{{ $event->created_at ? $event->created_at->format('d-m-Y H:i') : '-' }}</td>
-                    <td>{{ $event->updated_at ? $event->updated_at->format('d-m-Y H:i') : '-' }}</td>
-                    <td>
-                        <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                        <form action="{{ route('admin.events.destroy', $event->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus event ini?')">
-                                Hapus
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="16" class="text-center text-muted">Belum ada event.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <div class="d-flex justify-content-center">
+    {{-- Pagination --}}
+    <div class="mt-4 d-flex justify-content-center">
         {{ $events->links() }}
     </div>
 </div>
+
+{{-- Custom CSS --}}
+@push('styles')
+<style>
+    .btn-gradient {
+        background: linear-gradient(90deg, #007bff, #6610f2);
+        color: #fff;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-gradient:hover {
+        background: linear-gradient(90deg, #6610f2, #007bff);
+        transform: translateY(-2px);
+        color: #fff;
+    }
+    .bg-gradient {
+        background: linear-gradient(90deg, #28a745, #20c997);
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa !important;
+    }
+</style>
+@endpush
 @endsection

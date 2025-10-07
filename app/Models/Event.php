@@ -10,21 +10,11 @@ class Event extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'description',
-        'price',
-        'date',
-        'location',
-        'total_tickets',
-        'available_tickets',
-        'poster',
-        'venue_id',
-        'vip_tickets',
-        'vip_price',
-        'reguler_tickets',
-        'reguler_price'
-    ];
+protected $fillable = [
+    'name', 'description', 'date', 'location', 'price',
+    'total_tickets', 'available_tickets', 'venue_id', 'poster'
+];
+
 
     // Relasi ke Venue
     public function venue()
