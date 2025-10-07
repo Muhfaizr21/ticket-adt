@@ -26,7 +26,6 @@
 
                         <i class="bi bi-calendar-event menu-icon"></i>
                         <span class="menu-text">Events</span>
-                        {{-- <span class="menu-badge">12</span> --}}
                     </a>
                 </li>
                 <li class="menu-item">
@@ -34,7 +33,6 @@
                         class="menu-link {{ request()->is('admin/orders*') ? 'active' : '' }}">
                         <i class="bi bi-ticket-perforated menu-icon"></i>
                         <span class="menu-text">Ticket Orders</span>
-                        {{-- <span class="menu-badge">8</span> --}}
                     </a>
                 </li>
                 <li class="menu-item">
@@ -62,7 +60,6 @@
                         class="menu-link {{ request()->is('admin/promotions*') ? 'active' : '' }}">
                         <i class="bi bi-percent menu-icon"></i>
                         <span class="menu-text">Promotions</span>
-                        {{-- <span class="menu-badge"></span> --}}
                     </a>
                 </li>
                 <li class="menu-item">
@@ -92,15 +89,19 @@
                         <span class="menu-text">Settings</span>
                     </a>
                 </li>
+
+                {{-- 🔔 Notifications --}}
+                @if(Route::has('admin.notifications.index'))
                 <li class="menu-item">
-                    <a href="#" class="menu-link {{ request()->is('admin/notifications*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.notifications.index') }}" class="menu-link {{ request()->is('admin/notifications*') ? 'active' : '' }}">
                         <i class="bi bi-bell-fill menu-icon"></i>
                         <span class="menu-text">Notifications</span>
-                        {{-- <span class="menu-badge">7</span> --}}
                     </a>
                 </li>
+                @endif
+
                 <li class="menu-item">
-                    <a href="#" class="menu-link {{ request()->is('admin/support*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.support.index') }}" class="menu-link {{ request()->is('admin/support*') ? 'active' : '' }}">
                         <i class="bi bi-question-circle-fill menu-icon"></i>
                         <span class="menu-text">Help & Support</span>
                     </a>

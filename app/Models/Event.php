@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Venue;
 
 class Event extends Model
 {
@@ -13,20 +12,27 @@ class Event extends Model
     protected $fillable = [
         'name',
         'description',
-        'price',
         'date',
         'location',
+        'price',
+        'status',
         'total_tickets',
         'available_tickets',
-        'poster',
         'venue_id',
+        'poster',
         'vip_tickets',
         'vip_price',
         'reguler_tickets',
-        'reguler_price'
+        'reguler_price',
     ];
 
-    // Relasi ke Venue
+    // Relasi ke Order
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    // Relasi ke Venue (opsional)
     public function venue()
     {
         return $this->belongsTo(Venue::class);

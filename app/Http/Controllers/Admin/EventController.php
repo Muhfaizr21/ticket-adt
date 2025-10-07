@@ -20,7 +20,7 @@ class EventController extends Controller
     // 🟢 Form tambah event baru
     public function create()
     {
-        $venues = Venue::all(); // ambil semua venue
+        $venues = Venue::all();
         return view('admin.events.create', compact('venues'));
     }
 
@@ -28,27 +28,27 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'location' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'total_tickets' => 'required|integer|min:1',
-            'venue_id' => 'nullable|exists:venues,id', // validasi venue
-            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+            'name'           => 'required|string|max:255',
+            'description'    => 'nullable|string',
+            'date'           => 'required|date',
+            'location'       => 'required|string|max:255',
+            'price'          => 'required|numeric|min:0',
+            'total_tickets'  => 'required|integer|min:1',
+            'venue_id'       => 'nullable|exists:venues,id',
+            'poster'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $data = $validated;
-
+        // Upload poster jika ada
         if ($request->hasFile('poster')) {
-            $data['poster'] = $request->file('poster')->store('posters', 'public');
+            $validated['poster'] = $request->file('poster')->store('posters', 'public');
         }
 
-        $data['available_tickets'] = $data['total_tickets'];
+        $validated['available_tickets'] = $validated['total_tickets'];
 
-        Event::create($data);
+        Event::create($validated);
 
-        return redirect()->route('admin.events.index')->with('success', 'Event berhasil ditambahkan!');
+        return redirect()->route('admin.events.index')
+            ->with('success', '✅ Event baru berhasil ditambahkan!');
     }
 
     // 🟢 Form edit event
@@ -59,22 +59,21 @@ class EventController extends Controller
         return view('admin.events.edit', compact('event', 'venues'));
     }
 
-
-    // 🟢 Update data event
+    // 🟢 Update event
     public function update(Request $request, $id)
     {
         $event = Event::findOrFail($id);
 
         // Validasi input
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'location' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'total_tickets' => 'required|integer|min:1',
-            'venue_id' => 'nullable|exists:venues,id',
-            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+            'name'           => 'required|string|max:255',
+            'description'    => 'nullable|string',
+            'date'           => 'required|date',
+            'location'       => 'required|string|max:255',
+            'price'          => 'nullable|numeric|min:0', // ← tidak wajib lagi
+            'total_tickets'  => 'required|integer|min:1',
+            'venue_id'       => 'nullable|exists:venues,id',
+            'poster'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         // Tangani poster
@@ -97,9 +96,8 @@ class EventController extends Controller
         $event->update($validated);
 
         return redirect()->route('admin.events.index')
-            ->with('success', 'Event berhasil diperbarui!');
+            ->with('success', '✅ Data event berhasil diperbarui!');
     }
-
 
     // 🟢 Hapus event
     public function destroy($id)
@@ -112,6 +110,7 @@ class EventController extends Controller
 
         $event->delete();
 
-        return redirect()->route('admin.events.index')->with('success', '🗑️ Event berhasil dihapus.');
+        return redirect()->route('admin.events.index')
+            ->with('success', '🗑️ Event berhasil dihapus.');
     }
 }
