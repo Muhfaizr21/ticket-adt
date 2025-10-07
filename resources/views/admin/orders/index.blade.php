@@ -64,7 +64,7 @@
                 <tr>
                     <td colspan="8" class="text-center text-muted py-4">
                         <i class="bi bi-ticket-x fs-3 d-block mb-2"></i>
-                        Belum ada pembelian tiket.
+                        Belum ada pembelian tikets.
                     </td>
                 </tr>
                 @endforelse
