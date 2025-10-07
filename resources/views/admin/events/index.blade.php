@@ -18,7 +18,11 @@
                     <th>#</th>
                     <th>Poster</th>
                     <th>Nama Event</th>
-                    <th>Harga Tiket</th>
+                    <th>Tanggal</th>
+                    <th>Lokasi</th>
+                    <th>Harga Tiket (Default)</th>
+                    <th>VIP (Jumlah / Harga)</th>
+                    <th>Reguler (Jumlah / Harga)</th>
                     <th>Total Tiket</th>
                     <th>Tiket Tersedia</th>
                     <th>Dibuat Pada</th>
@@ -27,61 +31,75 @@
             </thead>
             <tbody>
                 @forelse($events as $event)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>
+                            @if($event->poster)
+                                <img src="{{ asset('storage/' . $event->poster) }}" alt="Poster {{ $event->name }}"
+                                    class="rounded shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
+                            @else
+                                <span class="text-muted fst-italic">Tidak ada</span>
+                            @endif
+                        </td>
+                        <td class="fw-semibold text-start">{{ $event->name }}</td>
+                        <td>{{ $event->date ? \Carbon\Carbon::parse($event->date)->format('d M Y') : '-' }}</td>
+                        <td>{{ $event->location ?? '-' }}</td>
+                        <td>Rp {{ number_format($event->price, 0, ',', '.') }}</td>
 
-                    {{-- Poster Event --}}
-                    <td>
-                        @if($event->poster)
-                            <img src="{{ asset('storage/' . $event->poster) }}"
-                                 alt="Poster {{ $event->name }}"
-                                 class="rounded shadow-sm"
-                                 style="width: 80px; height: 80px; object-fit: cover;">
-                        @else
-                            <span class="text-muted fst-italic">Tidak ada</span>
-                        @endif
-                    </td>
+                        {{-- VIP --}}
+                        <td>
+                            {{ $event->vip_tickets ?? ceil($event->total_tickets * 0.3) }} / 
+                            Rp {{ number_format($event->vip_price ?? ($event->price * 1.5), 0, ',', '.') }}
+                        </td>
 
-                    <td class="fw-semibold">{{ $event->name }}</td>
-                    <td>Rp {{ number_format($event->price, 0, ',', '.') }}</td>
-                    <td>{{ $event->total_tickets }}</td>
-                    <td>{{ $event->available_tickets }}</td>
-                    <td>{{ $event->created_at->format('d M Y') }}</td>
+                        {{-- Reguler --}}
+                        <td>
+                            {{ $event->reguler_tickets ?? floor($event->total_tickets * 0.7) }} / 
+                            Rp {{ number_format($event->reguler_price ?? $event->price, 0, ',', '.') }}
+                        </td>
 
-                    {{-- Tombol Aksi --}}
-                    <td>
-                        <a href="{{ route('admin.events.edit', $event->id) }}"
-                           class="btn btn-sm btn-warning me-1" title="Edit Event">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
+                        <td>{{ $event->total_tickets }}</td>
+                        <td>{{ $event->available_tickets }}</td>
+                        <td>{{ $event->created_at->format('d M Y') }}</td>
 
-                        <form id="delete-form-{{ $event->id }}"
-                              action="{{ route('admin.events.destroy', $event->id) }}"
-                              method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="button" class="btn btn-sm btn-danger"
-                                    onclick="confirmDelete({{ $event->id }})"
-                                    title="Hapus Event">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
+                        <td>
+                            <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-sm btn-warning me-1"
+                               title="Edit Event">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <form id="delete-form-{{ $event->id }}" action="{{ route('admin.events.destroy', $event->id) }}"
+                                  method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="confirmDelete({{ $event->id }})" title="Hapus Event">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
                 @empty
-                <tr>
-                    <td colspan="8" class="text-center text-muted py-4">
-                        <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
-                        Belum ada event yang ditambahkan.
-                    </td>
-                </tr>
+                    <tr>
+                        <td colspan="12" class="text-center text-muted py-4">
+                            <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
+                            Belum ada event yang ditambahkan.
+                        </td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>
+
+        {{-- Pagination --}}
+        @if(method_exists($events, 'links'))
+            <div class="d-flex justify-content-center mt-3">
+                {{ $events->links() }}
+            </div>
+        @endif
     </div>
 </div>
 
-{{-- SweetAlert Notifikasi & Konfirmasi --}}
+{{-- SweetAlert --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function confirmDelete(id) {

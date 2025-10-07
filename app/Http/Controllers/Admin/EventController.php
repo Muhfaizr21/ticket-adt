@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
-    // 🟢 Tampilkan semua event
+    // 🟢 Daftar semua event
     public function index()
     {
-        $events = Event::all();
+        $events = Event::latest()->paginate(10); // pagination
         return view('admin.events.index', compact('events'));
     }
 
@@ -33,11 +33,9 @@ class EventController extends Controller
         ]);
 
         $data = $request->all();
-
         if ($request->hasFile('poster')) {
             $data['poster'] = $request->file('poster')->store('posters', 'public');
         }
-
         $data['available_tickets'] = $data['total_tickets'];
 
         Event::create($data);
@@ -48,7 +46,6 @@ class EventController extends Controller
     // 🟢 Form edit event
     public function edit($id)
     {
-        // 🔥 Ini bagian penting yang memperbaiki error kamu
         $event = Event::findOrFail($id);
         return view('admin.events.edit', compact('event'));
     }
@@ -64,17 +61,17 @@ class EventController extends Controller
         ]);
 
         $event = Event::findOrFail($id);
-
         $data = $request->all();
 
         if ($request->hasFile('poster')) {
-            // hapus poster lama
             if ($event->poster && Storage::disk('public')->exists($event->poster)) {
                 Storage::disk('public')->delete($event->poster);
             }
             $data['poster'] = $request->file('poster')->store('posters', 'public');
         }
 
+        // Pastikan available_tickets tidak melebihi total
+        $event->available_tickets = min($event->available_tickets, $data['total_tickets']);
         $event->update($data);
 
         return redirect()->route('admin.events.edit', $event->id)
@@ -91,5 +88,12 @@ class EventController extends Controller
         $event->delete();
 
         return redirect()->route('admin.events.index')->with('success', 'Event berhasil dihapus!');
+    }
+
+    // 🟢 Tampilkan tipe tiket (VIP & Reguler)
+    public function ticketTypes()
+    {
+        $events = Event::latest()->get();
+        return view('admin.tickets.ticket-types.index', compact('events'));
     }
 }

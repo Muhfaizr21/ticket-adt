@@ -40,14 +40,20 @@ Route::middleware(['auth'])->group(function () {
 
 // Protected Routes - Admin
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Events
     Route::resource('events', AdminEventController::class);
+
+    // Ticket Types (VIP & Reguler per event)
+    Route::resource('ticket-types', TicketTypeController::class)->except(['show', 'create', 'store', 'destroy']);
+    Route::post('ticket-types/update-all', [TicketTypeController::class, 'updateAll'])->name('ticket-types.update-all');
+
+
+    // Orders
     Route::resource('orders', OrderController::class);
-});
-//customers
-Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
+
+    // Customers
     Route::resource('customers', CustomerController::class)->only(['index', 'show']);
-});
-Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('ticket-types', TicketTypeController::class);
 });
