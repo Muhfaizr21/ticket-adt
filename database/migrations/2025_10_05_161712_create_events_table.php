@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->date('date'); // 🗓️ tanggal event
+            $table->date('date')->nullable();
             $table->string('location'); // 📍 lokasi event
             $table->decimal('price', 10, 2); // harga default
             $table->integer('total_tickets');
