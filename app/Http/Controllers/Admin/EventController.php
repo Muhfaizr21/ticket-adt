@@ -13,7 +13,7 @@ class EventController extends Controller
     // 🟢 Tampilkan semua event
     public function index()
     {
-        $events = Event::with('venue')->latest()->paginate(10);
+        $events = Event::latest()->paginate(10); // pagination
         return view('admin.events.index', compact('events'));
     }
 
@@ -29,71 +29,61 @@ class EventController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'location' => 'required|string|max:255',
-            'venue_id' => 'nullable|exists:venues,id',
-            'price' => 'required|numeric|min:0',
-            'total_tickets' => 'required|integer|min:1',
-            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'price' => 'required|numeric',
+            'total_tickets' => 'required|numeric|min:1',
+            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        // Upload poster jika ada
+        $data = $request->all();
         if ($request->hasFile('poster')) {
-            $validated['poster'] = $request->file('poster')->store('posters', 'public');
+            $data['poster'] = $request->file('poster')->store('posters', 'public');
         }
+        $data['available_tickets'] = $data['total_tickets'];
 
-        // Set available_tickets otomatis
-        $validated['available_tickets'] = $validated['total_tickets'];
+        Event::create($data);
 
-        Event::create($validated);
-
-        return redirect()->route('admin.events.index')->with('success', '✅ Event berhasil dibuat.');
+        return redirect()->route('admin.events.index')->with('success', 'Event berhasil ditambahkan!');
     }
 
     // 🟢 Form edit event
-    public function edit(Event $event)
+    public function edit($id)
     {
-        $venues = Venue::all();
-        return view('admin.events.edit', compact('event', 'venues'));
+        $event = Event::findOrFail($id);
+        return view('admin.events.edit', compact('event'));
     }
 
     // 🟢 Update data event
-    public function update(Request $request, Event $event)
+    public function update(Request $request, $id)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'location' => 'required|string|max:255',
-            'venue_id' => 'nullable|exists:venues,id',
-            'price' => 'required|numeric|min:0',
-            'total_tickets' => 'required|integer|min:1',
-            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'price' => 'required|numeric',
+            'total_tickets' => 'required|numeric|min:1',
+            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        // Hapus poster lama jika ada
+        $event = Event::findOrFail($id);
+        $data = $request->all();
+
         if ($request->hasFile('poster')) {
             if ($event->poster && Storage::disk('public')->exists($event->poster)) {
                 Storage::disk('public')->delete($event->poster);
             }
-            $validated['poster'] = $request->file('poster')->store('posters', 'public');
-        } else {
-            $validated['poster'] = $event->poster;
+            $data['poster'] = $request->file('poster')->store('posters', 'public');
         }
 
-        // Pastikan available_tickets tidak melebihi total_tickets
-        $validated['available_tickets'] = min($event->available_tickets, $validated['total_tickets']);
-
-        $event->update($validated);
+        // Pastikan available_tickets tidak melebihi total
+        $event->available_tickets = min($event->available_tickets, $data['total_tickets']);
+        $event->update($data);
 
         return redirect()->route('admin.events.edit', $event->id)
-            ->with('success', '✅ Event berhasil diperbarui.');
+            ->with('success', 'Event berhasil diperbarui!');
     }
 
     // 🟢 Hapus event
-    public function destroy(Event $event)
+    public function destroy($id)
     {
+        $event = Event::findOrFail($id);
         if ($event->poster && Storage::disk('public')->exists($event->poster)) {
             Storage::disk('public')->delete($event->poster);
         }

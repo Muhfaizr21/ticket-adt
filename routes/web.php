@@ -65,3 +65,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('venues', VenueController::class);
 });
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('events', App\Http\Controllers\Admin\EventController::class);
+});
