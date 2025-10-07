@@ -13,7 +13,7 @@ use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\Tickets\TicketTypeController;
-
+use App\Http\Controllers\Admin\VenueController;
 // Welcome
 Route::get('/welcome', function () {
     return view('welcome');
@@ -56,4 +56,12 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
 
     // Customers
     Route::resource('customers', CustomerController::class)->only(['index', 'show']);
+});
+// Promotions
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::resource('promotions', \App\Http\Controllers\Admin\PromotionController::class);
+});
+// Venues
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('venues', VenueController::class);
 });

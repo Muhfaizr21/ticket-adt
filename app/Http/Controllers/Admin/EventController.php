@@ -4,99 +4,97 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\Venue; // ⬅️ tambahkan ini
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
-    // 🟢 Daftar semua event
+    // 🟢 Tampilkan semua event
     public function index()
     {
-        $events = Event::latest()->paginate(10);
+        $events = Event::latest()->paginate(10); // pagination
         return view('admin.events.index', compact('events'));
     }
 
     // 🟢 Form tambah event baru
     public function create()
     {
-        return view('admin.events.create');
+        $venues = Venue::all(); // ambil semua lokasi (venue)
+        return view('admin.events.create', compact('venues'));
     }
 
-    // 🟢 Simpan event baru
+    // 🟢 Simpan data baru
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'location' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'total_tickets' => 'required|integer|min:1',
-            'available_tickets' => 'nullable|integer|min:0',
-            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'price' => 'required|numeric',
+            'total_tickets' => 'required|numeric|min:1',
+            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        // Upload poster jika ada
+        $data = $request->all();
         if ($request->hasFile('poster')) {
-            $validated['poster'] = $request->file('poster')->store('posters', 'public');
+            $data['poster'] = $request->file('poster')->store('posters', 'public');
         }
+        $data['available_tickets'] = $data['total_tickets'];
 
-        // Pastikan available_tickets ada
-        if (empty($validated['available_tickets'])) {
-            $validated['available_tickets'] = $validated['total_tickets'];
-        }
+        Event::create($data);
 
-        // Simpan ke database
-        Event::create($validated);
-
-        return redirect()->route('admin.events.index')->with('success', '✅ Event berhasil dibuat.');
+        return redirect()->route('admin.events.index')->with('success', 'Event berhasil ditambahkan!');
     }
 
     // 🟢 Form edit event
     public function edit(Event $event)
     {
+        $event = Event::findOrFail($id);
         return view('admin.events.edit', compact('event'));
     }
 
     // 🟢 Update data event
     public function update(Request $request, Event $event)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-            'location' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'total_tickets' => 'required|integer|min:1',
-            'available_tickets' => 'nullable|integer|min:0',
-            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'price' => 'required|numeric',
+            'total_tickets' => 'required|numeric|min:1',
+            'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        // Jika poster baru diupload
+        $event = Event::findOrFail($id);
+        $data = $request->all();
+
         if ($request->hasFile('poster')) {
             if ($event->poster && Storage::disk('public')->exists($event->poster)) {
                 Storage::disk('public')->delete($event->poster);
             }
-            $validated['poster'] = $request->file('poster')->store('posters', 'public');
-        } else {
-            // Gunakan poster lama jika tidak diubah
-            $validated['poster'] = $event->poster;
+            $data['poster'] = $request->file('poster')->store('posters', 'public');
         }
 
-        // Update data di database
-        $event->update($validated);
+        // Pastikan available_tickets tidak melebihi total
+        $event->available_tickets = min($event->available_tickets, $data['total_tickets']);
+        $event->update($data);
 
-        return redirect()->route('admin.events.index')->with('success', '✅ Event berhasil diperbarui.');
+        return redirect()->route('admin.events.edit', $event->id)
+            ->with('success', 'Event berhasil diperbarui!');
     }
 
     // 🟢 Hapus event
     public function destroy(Event $event)
     {
+        $event = Event::findOrFail($id);
         if ($event->poster && Storage::disk('public')->exists($event->poster)) {
             Storage::disk('public')->delete($event->poster);
         }
-
         $event->delete();
-        return redirect()->route('admin.events.index')->with('success', '🗑️ Event berhasil dihapus.');
+
+        return redirect()->route('admin.events.index')->with('success', 'Event berhasil dihapus!');
+    }
+
+    // 🟢 Tampilkan tipe tiket (VIP & Reguler)
+    public function ticketTypes()
+    {
+        $events = Event::latest()->get();
+        return view('admin.tickets.ticket-types.index', compact('events'));
     }
 }

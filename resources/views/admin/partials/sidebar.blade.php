@@ -53,14 +53,14 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link {{ request()->is('admin/promotions*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.promotions.index') }}" class="menu-link {{ request()->is('admin/promotions*') ? 'active' : '' }}">
                         <i class="bi bi-percent menu-icon"></i>
                         <span class="menu-text">Promotions</span>
                         <span class="menu-badge">3</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link {{ request()->is('admin/venues*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.venues.index') }}" class="menu-link {{ request()->is('admin/venues*') ? 'active' : '' }}">
                         <i class="bi bi-geo-alt-fill menu-icon"></i>
                         <span class="menu-text">Venues</span>
                     </a>
