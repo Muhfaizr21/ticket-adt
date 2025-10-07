@@ -14,25 +14,29 @@
             <div class="menu-title">Main Menu</div>
             <ul class="menu-items">
                 <li class="menu-item">
-                    <a href="{{ route('admin.dashboard') }}" class="menu-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('admin.dashboard') }}"
+                        class="menu-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                         <i class="bi bi-speedometer2 menu-icon"></i>
                         <span class="menu-text">Dashboard</span>
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="{{ route('admin.events.index') }}" class="menu-link {{ request()->is('admin/events*') ? 'active' : '' }}">
+
                         <i class="bi bi-calendar-event menu-icon"></i>
                         <span class="menu-text">Events</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{ route('admin.orders.index') }}" class="menu-link {{ request()->is('admin/orders*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.orders.index') }}"
+                        class="menu-link {{ request()->is('admin/orders*') ? 'active' : '' }}">
                         <i class="bi bi-ticket-perforated menu-icon"></i>
                         <span class="menu-text">Ticket Orders</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{ route('admin.customers.index') }}" class="menu-link {{ request()->is('admin/customers*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.customers.index') }}"
+                        class="menu-link {{ request()->is('admin/customers*') ? 'active' : '' }}">
                         <i class="bi bi-people-fill menu-icon"></i>
                         <span class="menu-text">Customers</span>
                     </a>
@@ -44,25 +48,29 @@
             <div class="menu-title">Management</div>
             <ul class="menu-items">
                 <li class="menu-item">
-                    <a href="{{ route('admin.ticket-types.index') }}" class="menu-link {{ request()->is('admin/ticket-types*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.ticket-types.index') }}"
+                        class="menu-link {{ request()->is('admin/ticket-types*') ? 'active' : '' }}">
                         <i class="bi bi-tags-fill menu-icon"></i>
                         <span class="menu-text">Ticket Types</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{ route('admin.promotions.index') }}" class="menu-link {{ request()->is('admin/promotions*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.promotions.index') }}"
+                        class="menu-link {{ request()->is('admin/promotions*') ? 'active' : '' }}">
                         <i class="bi bi-percent menu-icon"></i>
                         <span class="menu-text">Promotions</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{ route('admin.venues.index') }}" class="menu-link {{ request()->is('admin/venues*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.venues.index') }}"
+                        class="menu-link {{ request()->is('admin/venues*') ? 'active' : '' }}">
                         <i class="bi bi-geo-alt-fill menu-icon"></i>
                         <span class="menu-text">Venues</span>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="{{ route('admin.reports.index') }}" class="menu-link {{ request()->is('admin/reports*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.reports.index') }}"
+                        class="menu-link {{ request()->is('admin/reports*') ? 'active' : '' }}">
                         <i class="bi bi-bar-chart-fill menu-icon"></i>
                         <span class="menu-text">Reports</span>
                     </a>
@@ -74,7 +82,8 @@
             <div class="menu-title">System</div>
             <ul class="menu-items">
                 <li class="menu-item">
-                    <a href="#" class="menu-link {{ request()->is('admin/settings*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.settings.index') }}"
+                        class="menu-link {{ request()->is('admin/settings*') ? 'active' : '' }}">
                         <i class="bi bi-gear-fill menu-icon"></i>
                         <span class="menu-text">Settings</span>
                     </a>

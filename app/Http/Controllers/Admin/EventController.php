@@ -64,6 +64,7 @@ class EventController extends Controller
     {
         $event = Event::findOrFail($id);
 
+        // Validasi semua kolom
         $validated = $request->validate([
             'name'           => 'required|string|max:255',
             'description'    => 'nullable|string',
@@ -77,24 +78,24 @@ class EventController extends Controller
 
         $data = $validated;
 
-        // 🔹 Simpan poster baru jika ada
+        // Poster
         if ($request->hasFile('poster')) {
             if ($event->poster && Storage::disk('public')->exists($event->poster)) {
                 Storage::disk('public')->delete($event->poster);
             }
-            $data['poster'] = $request->file('poster')->store('posters', 'public');
+            $validated['poster'] = $request->file('poster')->store('posters', 'public');
         }
 
-        // 🔹 Pastikan available_tickets tidak melebihi total_tickets
+        // Jangan ubah VIP/Reguler tickets & harga
+        $data['vip_tickets'] = $event->vip_tickets;
+        $data['vip_price'] = $event->vip_price;
+        $data['reguler_tickets'] = $event->reguler_tickets;
+        $data['reguler_price'] = $event->reguler_price;
+
+        // Pastikan available_tickets tidak melebihi total_tickets
         $data['available_tickets'] = min($event->available_tickets, $data['total_tickets']);
 
-        // 🔹 Harga: tetap gunakan harga lama jika tidak diisi
-        if (empty($data['price'])) {
-            $data['price'] = $event->price;
-        }
-
-        // 🔹 Simpan update
-        $event->update($data);
+        $event->fill($data)->save();
 
         return redirect()->route('admin.events.index')
             ->with('success', '✅ Data event berhasil diperbarui!');

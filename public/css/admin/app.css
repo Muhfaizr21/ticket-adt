@@ -6,6 +6,7 @@
 }
 
 :root {
+    
     --primary-color: #03346E;
     --secondary-color: #6EACDA;
     --accent-color: #DC3C22;
@@ -28,6 +29,15 @@ body {
     color: var(--dark-text);
     line-height: 1.6;
 }
+
+/* Light Theme */
+    body.light { background-color: #f8f9fa; color: #212529; }
+    body.light .sidebar, body.light .topbar { background-color: #ffffff; color: #212529; }
+
+    /* Dark Theme */
+    body.dark { background-color: #121212; color: #f1f1f1; }
+    body.dark .sidebar, body.dark .topbar { background-color: #1f1f1f; color: #f1f1f1; }
+    body.dark a, body.dark .dropdown-item { color: #f1f1f1; }
 
 .admin-layout {
     display: flex;
