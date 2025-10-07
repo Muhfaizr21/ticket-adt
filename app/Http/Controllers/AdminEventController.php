@@ -9,16 +9,16 @@ use Illuminate\Support\Facades\Storage;
 class AdminEventController extends Controller
 {
     /**
-     * Menampilkan semua event (Halaman Daftar Event)
+     * 🟢 Menampilkan semua event
      */
     public function index()
     {
-        $events = Event::latest()->paginate(10); // pagination untuk rapi
+        $events = Event::latest()->paginate(10);
         return view('admin.events.index', compact('events'));
     }
 
     /**
-     * Form tambah event
+     * 🟢 Form tambah event baru
      */
     public function create()
     {
@@ -26,38 +26,51 @@ class AdminEventController extends Controller
     }
 
     /**
-     * Simpan event baru ke database
+     * 🟢 Simpan event baru ke database
      */
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|integer|min:0',
+            'date' => 'required|date',
+            'location' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
             'total_tickets' => 'required|integer|min:1',
             'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $posterPath = null;
-        if ($request->hasFile('poster')) {
-            $posterPath = $request->file('poster')->store('posters', 'public');
-        }
+        // Upload poster jika ada
+        $posterPath = $request->hasFile('poster')
+            ? $request->file('poster')->store('posters', 'public')
+            : null;
 
+        $vip = ceil($request->total_tickets * 0.3);
+        $reguler = floor($request->total_tickets * 0.7);
+
+        // Simpan event
         Event::create([
             'name' => $request->name,
             'description' => $request->description,
+            'date' => $request->date,
+            'location' => $request->location,
             'price' => $request->price,
             'total_tickets' => $request->total_tickets,
             'available_tickets' => $request->total_tickets,
+            'vip_tickets' => null,
+            'vip_price' => null,
+            'reguler_tickets' => null,
+            'reguler_price' => null,
             'poster' => $posterPath,
         ]);
+
 
         return redirect()->route('admin.events.index')
             ->with('success', 'Event berhasil dibuat.');
     }
 
     /**
-     * Form edit event
+     * 🟢 Form edit event
      */
     public function edit(Event $event)
     {
@@ -65,14 +78,16 @@ class AdminEventController extends Controller
     }
 
     /**
-     * Update data event
+     * 🟢 Update data event
      */
     public function update(Request $request, Event $event)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|integer|min:0',
+            'date' => 'required|date',
+            'location' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
             'total_tickets' => 'required|integer|min:1',
             'poster' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -85,8 +100,11 @@ class AdminEventController extends Controller
             $event->poster = $request->file('poster')->store('posters', 'public');
         }
 
+        // Update data dasar event
         $event->name = $request->name;
         $event->description = $request->description;
+        $event->date = $request->date;
+        $event->location = $request->location;
         $event->price = $request->price;
         $event->total_tickets = $request->total_tickets;
 
@@ -102,10 +120,11 @@ class AdminEventController extends Controller
     }
 
     /**
-     * Hapus event
+     * 🟢 Hapus event
      */
     public function destroy(Event $event)
     {
+        // Hapus poster jika ada
         if ($event->poster && Storage::disk('public')->exists($event->poster)) {
             Storage::disk('public')->delete($event->poster);
         }
@@ -115,5 +134,4 @@ class AdminEventController extends Controller
         return redirect()->route('admin.events.index')
             ->with('success', 'Event berhasil dihapus.');
     }
-
 }

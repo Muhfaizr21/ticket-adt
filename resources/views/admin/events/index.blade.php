@@ -1,10 +1,10 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Manajemen Event')
 
 @section('content')
 <div class="page-header d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-semibold text-dark">Manajemen Event</h2>
+    <h2 class="fw-semibold text-dark mb-0">🎫 Manajemen Event</h2>
     <a href="{{ route('admin.events.create') }}" class="btn btn-primary shadow-sm">
         <i class="bi bi-plus-circle me-1"></i> Tambah Event
     </a>
@@ -20,12 +20,12 @@
                     <th>Nama Event</th>
                     <th>Tanggal</th>
                     <th>Lokasi</th>
-                    <th>Harga Tiket (Default)</th>
+                    <th>Harga Dasar</th>
                     <th>VIP (Jumlah / Harga)</th>
                     <th>Reguler (Jumlah / Harga)</th>
                     <th>Total Tiket</th>
-                    <th>Tiket Tersedia</th>
-                    <th>Dibuat Pada</th>
+                    <th>Tersedia</th>
+                    <th>Dibuat</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -33,47 +33,71 @@
                 @forelse($events as $event)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
+
+                        {{-- Poster --}}
                         <td>
                             @if($event->poster)
-                                <img src="{{ asset('storage/' . $event->poster) }}" alt="Poster {{ $event->name }}"
-                                    class="rounded shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
+                                <img src="{{ asset('storage/' . $event->poster) }}" 
+                                     alt="Poster {{ e($event->name) }}" 
+                                     class="rounded shadow-sm"
+                                     style="width: 70px; height: 70px; object-fit: cover;">
                             @else
                                 <span class="text-muted fst-italic">Tidak ada</span>
                             @endif
                         </td>
-                        <td class="fw-semibold text-start">{{ $event->name }}</td>
-                        <td>{{ $event->date ? \Carbon\Carbon::parse($event->date)->format('d M Y') : '-' }}</td>
-                        <td>{{ $event->location ?? '-' }}</td>
+
+                        {{-- Nama Event --}}
+                        <td class="fw-semibold text-start">{{ e($event->name) }}</td>
+
+                        {{-- Tanggal --}}
+                        <td>{{ $event->date ? \Carbon\Carbon::parse($event->date)->translatedFormat('d M Y') : '-' }}</td>
+
+                        {{-- Lokasi --}}
+                        <td>{{ e($event->location ?? '-') }}</td>
+
+                        {{-- Harga Dasar --}}
                         <td>Rp {{ number_format($event->price, 0, ',', '.') }}</td>
 
                         {{-- VIP --}}
                         <td>
-                            {{ $event->vip_tickets ?? ceil($event->total_tickets * 0.3) }} / 
-                            Rp {{ number_format($event->vip_price ?? ($event->price * 1.5), 0, ',', '.') }}
+                            {{ $event->vip_tickets ?? 0 }} / 
+                            Rp {{ number_format($event->vip_price ?? 0, 0, ',', '.') }}
                         </td>
 
                         {{-- Reguler --}}
                         <td>
-                            {{ $event->reguler_tickets ?? floor($event->total_tickets * 0.7) }} / 
-                            Rp {{ number_format($event->reguler_price ?? $event->price, 0, ',', '.') }}
+                            {{ $event->reguler_tickets ?? 0 }} / 
+                            Rp {{ number_format($event->reguler_price ?? 0, 0, ',', '.') }}
                         </td>
 
+                        {{-- Total & Available --}}
                         <td>{{ $event->total_tickets }}</td>
-                        <td>{{ $event->available_tickets }}</td>
-                        <td>{{ $event->created_at->format('d M Y') }}</td>
-
                         <td>
-                            <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-sm btn-warning me-1"
+                            <span class="{{ $event->available_tickets <= 5 ? 'text-danger fw-bold' : '' }}">
+                                {{ $event->available_tickets }}
+                            </span>
+                        </td>
+
+                        {{-- Created At --}}
+                        <td>{{ $event->created_at ? $event->created_at->translatedFormat('d M Y') : '-' }}</td>
+
+                        {{-- Aksi --}}
+                        <td>
+                            <a href="{{ route('admin.events.edit', $event->id) }}" 
+                               class="btn btn-sm btn-warning me-1" 
                                title="Edit Event">
                                 <i class="bi bi-pencil-square"></i>
                             </a>
 
-                            <form id="delete-form-{{ $event->id }}" action="{{ route('admin.events.destroy', $event->id) }}"
+                            <form id="delete-form-{{ $event->id }}" 
+                                  action="{{ route('admin.events.destroy', $event->id) }}" 
                                   method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" class="btn btn-sm btn-danger"
-                                        onclick="confirmDelete({{ $event->id }})" title="Hapus Event">
+                                <button type="button" 
+                                        class="btn btn-sm btn-danger"
+                                        onclick="confirmDelete({{ $event->id }})" 
+                                        title="Hapus Event">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
@@ -98,8 +122,9 @@
         @endif
     </div>
 </div>
+@endsection
 
-{{-- SweetAlert --}}
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function confirmDelete(id) {
@@ -139,4 +164,4 @@ Swal.fire({
 });
 @endif
 </script>
-@endsection
+@endpush

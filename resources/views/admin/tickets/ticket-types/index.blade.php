@@ -29,28 +29,43 @@
             </thead>
             <tbody>
                 @forelse($events as $index => $event)
-                    {{-- VIP --}}
+                    {{-- Baris VIP --}}
                     <tr>
                         <td>{{ ($index + 1) }}A</td>
                         <td>{{ $event->name }}</td>
                         <td><span class="badge bg-warning text-dark">VIP</span></td>
-                        <td>{{ $event->vip_tickets ?? ceil($event->total_tickets * 0.3) }}</td>
-                        <td>Rp {{ number_format($event->vip_price ?? $event->price * 1.5, 0, ',', '.') }}</td>
-                        <td rowspan="2">
+                        <td>
+                            {{ $event->vip_tickets ?? '-' }}
+                        </td>
+                        <td>
+                            @if($event->vip_price)
+                                Rp {{ number_format($event->vip_price, 0, ',', '.') }}
+                            @else
+                                <span class="text-muted">Belum diatur</span>
+                            @endif
+                        </td>
+                        <td rowspan="2" class="align-middle">
                             <a href="{{ route('admin.ticket-types.edit', $event->id) }}" class="btn btn-sm btn-warning">
                                 <i class="bi bi-pencil-square me-1"></i> Edit
                             </a>
                         </td>
                     </tr>
 
-                    {{-- Reguler --}}
+                    {{-- Baris Reguler --}}
                     <tr>
                         <td>{{ ($index + 1) }}B</td>
                         <td>{{ $event->name }}</td>
                         <td><span class="badge bg-primary">Reguler</span></td>
-                        <td>{{ $event->reguler_tickets ?? floor($event->total_tickets * 0.7) }}</td>
-                        <td>Rp {{ number_format($event->reguler_price ?? $event->price, 0, ',', '.') }}</td>
-                        {{-- Kolom aksi kosong karena sudah di rowspan --}}
+                        <td>
+                            {{ $event->reguler_tickets ?? '-' }}
+                        </td>
+                        <td>
+                            @if($event->reguler_price)
+                                Rp {{ number_format($event->reguler_price, 0, ',', '.') }}
+                            @else
+                                <span class="text-muted">Belum diatur</span>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>

@@ -25,7 +25,7 @@
 
                     {{-- Harga Tiket Default --}}
                     <div class="col-md-6">
-                        <label for="price" class="form-label fw-semibold">Harga Tiket Default (Rp)</label>
+                        <label for="price" class="form-label fw-semibold">Harga Tiket (Rp)</label>
                         <input type="number" name="price" id="price"
                             class="form-control @error('price') is-invalid @enderror"
                             placeholder="Contoh: 50000" value="{{ old('price') }}" required>
@@ -84,46 +84,6 @@
                         @enderror
                     </div>
 
-                    {{-- VIP Tickets --}}
-                    <div class="col-md-6">
-                        <label for="vip_tickets" class="form-label fw-semibold">Tiket VIP (Jumlah)</label>
-                        <input type="number" name="vip_tickets" id="vip_tickets"
-                            class="form-control @error('vip_tickets') is-invalid @enderror"
-                            placeholder="Contoh: 300" value="{{ old('vip_tickets') }}">
-                        @error('vip_tickets')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                    <div class="col-md-6">
-                        <label for="vip_price" class="form-label fw-semibold">Harga Tiket VIP (Rp)</label>
-                        <input type="number" name="vip_price" id="vip_price"
-                            class="form-control @error('vip_price') is-invalid @enderror"
-                            placeholder="Contoh: 75000" value="{{ old('vip_price') }}">
-                        @error('vip_price')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-
-                    {{-- Reguler Tickets --}}
-                    <div class="col-md-6">
-                        <label for="reguler_tickets" class="form-label fw-semibold">Tiket Reguler (Jumlah)</label>
-                        <input type="number" name="reguler_tickets" id="reguler_tickets"
-                            class="form-control @error('reguler_tickets') is-invalid @enderror"
-                            placeholder="Contoh: 700" value="{{ old('reguler_tickets') }}">
-                        @error('reguler_tickets')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-                    <div class="col-md-6">
-                        <label for="reguler_price" class="form-label fw-semibold">Harga Tiket Reguler (Rp)</label>
-                        <input type="number" name="reguler_price" id="reguler_price"
-                            class="form-control @error('reguler_price') is-invalid @enderror"
-                            placeholder="Contoh: 50000" value="{{ old('reguler_price') }}">
-                        @error('reguler_price')
-                            <small class="text-danger">{{ $message }}</small>
-                        @enderror
-                    </div>
-
                     {{-- Poster Event --}}
                     <div class="col-md-12">
                         <label for="poster" class="form-label fw-semibold">Poster Event</label>
@@ -137,10 +97,9 @@
 
                         <div class="mt-3">
                             <img id="preview" src="#" alt="Preview Poster" class="img-thumbnail d-none"
-                                 style="max-height: 200px;">
+                                style="max-height: 200px;">
                         </div>
                     </div>
-
                 </div>
 
                 <div class="text-end mt-4">
