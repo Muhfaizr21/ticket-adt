@@ -15,8 +15,9 @@ return new class extends Migration
             $table->date('date')->nullable();
             $table->string('location'); // 📍 lokasi event
             $table->decimal('price', 10, 2); // harga default
-            $table->integer('total_tickets');
-            $table->integer('available_tickets');
+            $table->integer('total_tickets')->default(0);
+            $table->integer('available_tickets')->default(0);
+
 
             // Tiket VIP
             $table->integer('vip_tickets')->nullable();

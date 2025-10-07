@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Order extends Model
+class Ticket extends Model
 {
     use HasFactory;
 
@@ -13,7 +13,7 @@ class Order extends Model
         'event_id',
         'user_id',
         'type',
-        'total_price',
+        'price',
         'status',
     ];
 
@@ -23,7 +23,7 @@ class Order extends Model
         return $this->belongsTo(Event::class);
     }
 
-    // Relasi ke User
+    // Relasi ke User (pembeli)
     public function user()
     {
         return $this->belongsTo(User::class);
