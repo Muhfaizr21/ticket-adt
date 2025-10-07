@@ -24,14 +24,14 @@
 
                         <i class="bi bi-calendar-event menu-icon"></i>
                         <span class="menu-text">Events</span>
-                        <span class="menu-badge">12</span>
+                        {{-- <span class="menu-badge">12</span> --}}
                     </a>
                 </li>
                 <li class="menu-item">
                     <a href="{{ route('admin.orders.index') }}" class="menu-link {{ request()->is('admin/orders*') ? 'active' : '' }}">
                         <i class="bi bi-ticket-perforated menu-icon"></i>
                         <span class="menu-text">Ticket Orders</span>
-                        <span class="menu-badge">8</span>
+                        {{-- <span class="menu-badge">8</span> --}}
                     </a>
                 </li>
                 <li class="menu-item">
@@ -56,7 +56,7 @@
                     <a href="{{ route('admin.promotions.index') }}" class="menu-link {{ request()->is('admin/promotions*') ? 'active' : '' }}">
                         <i class="bi bi-percent menu-icon"></i>
                         <span class="menu-text">Promotions</span>
-                        <span class="menu-badge">3</span>
+                        {{-- <span class="menu-badge"></span> --}}
                     </a>
                 </li>
                 <li class="menu-item">
@@ -66,7 +66,7 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link {{ request()->is('admin/reports*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.reports.index') }}" class="menu-link {{ request()->is('admin/reports*') ? 'active' : '' }}">
                         <i class="bi bi-bar-chart-fill menu-icon"></i>
                         <span class="menu-text">Reports</span>
                     </a>
@@ -87,7 +87,7 @@
                     <a href="#" class="menu-link {{ request()->is('admin/notifications*') ? 'active' : '' }}">
                         <i class="bi bi-bell-fill menu-icon"></i>
                         <span class="menu-text">Notifications</span>
-                        <span class="menu-badge">7</span>
+                        {{-- <span class="menu-badge">7</span> --}}
                     </a>
                 </li>
                 <li class="menu-item">

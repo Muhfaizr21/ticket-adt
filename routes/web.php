@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\Tickets\TicketTypeController;
 use App\Http\Controllers\Admin\VenueController;
+use App\Http\Controllers\Admin\ReportController;
 // Welcome
 Route::get('/welcome', function () {
     return view('welcome');
@@ -67,4 +68,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('events', App\Http\Controllers\Admin\EventController::class);
+});
+// Reports
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
 });

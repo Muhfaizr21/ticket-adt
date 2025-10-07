@@ -27,6 +27,10 @@ public function events()
 {
     return $this->hasMany(Event::class);
 }
+public function orders()
+{
+    return $this->hasMany(\App\Models\Order::class);
+}
 
 
 }
