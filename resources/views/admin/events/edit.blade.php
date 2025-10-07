@@ -4,11 +4,32 @@
 
 @section('content')
 <style>
-/* (Gunakan styling yang sama seperti sebelumnya, tidak saya ulangi agar ringkas) */
+    .poster-preview {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #eee;
+    }
+    .btn-submit {
+        background-color: #198754;
+        color: white;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 6px;
+        transition: 0.2s;
+    }
+    .btn-submit:hover {
+        background-color: #157347;
+    }
+    .required-star {
+        color: red;
+        font-weight: bold;
+    }
 </style>
 
 <div class="page-header d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-dark">Edit Event</h2>
+    <h2 class="fw-bold text-dark">✏️ Edit Event</h2>
     <a href="{{ route('admin.events.index') }}" class="btn btn-secondary shadow-sm">
         <i class="bi bi-arrow-left me-1"></i> Kembali
     </a>
@@ -54,7 +75,7 @@
                     </div>
 
                     {{-- VIP --}}
-                    <h5 class="mb-3 mt-4">VIP Ticket</h5>
+                    <h5 class="mb-3 mt-4 text-primary">VIP Ticket</h5>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Jumlah Tiket VIP</label>
@@ -69,7 +90,7 @@
                     </div>
 
                     {{-- Reguler --}}
-                    <h5 class="mb-3 mt-4">Reguler Ticket</h5>
+                    <h5 class="mb-3 mt-4 text-primary">Reguler Ticket</h5>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Jumlah Tiket Reguler</label>
@@ -105,21 +126,65 @@
                         <label class="form-label">Poster Event</label>
                         @if($event->poster)
                             <div class="poster-preview-container mb-2">
-                                <img src="{{ asset('storage/' . $event->poster) }}" alt="Poster Event" class="poster-preview">
+                                <img id="preview" src="{{ asset('storage/' . $event->poster) }}" alt="Poster Event" class="poster-preview">
                             </div>
+                        @else
+                            <img id="preview" src="#" class="poster-preview d-none" alt="Preview Poster">
                         @endif
-                        <input type="file" name="poster" class="form-control">
+                        <input type="file" name="poster" class="form-control" accept="image/*" onchange="previewPoster(event)">
+                        <small class="text-muted">Format: JPG, JPEG, PNG (maks. 2MB)</small>
                     </div>
                 </div>
             </div>
 
             {{-- Tombol Submit --}}
-            <div class="mt-4 pt-4 border-top">
-                <button type="submit" class="btn btn-submit">Update Info</button>
+            <div class="mt-4 pt-4 border-top text-end">
+                <button type="submit" class="btn btn-submit">💾 Update Info</button>
                 <a href="{{ route('admin.events.index') }}" class="btn btn-secondary ms-2">Batal</a>
             </div>
 
         </form>
     </div>
 </div>
+
+{{-- Script Preview Poster --}}
+<script>
+function previewPoster(event) {
+    const preview = document.getElementById('preview');
+    const file = event.target.files[0];
+    if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.classList.remove('d-none');
+    } else {
+        preview.src = '#';
+        preview.classList.add('d-none');
+    }
+}
+</script>
+
+{{-- SweetAlert Notifikasi --}}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if(session('success'))
+<script>
+Swal.fire({
+    icon: 'success',
+    title: 'Berhasil!',
+    text: '{{ session('success') }}',
+    timer: 2000,
+    showConfirmButton: false
+});
+</script>
+@endif
+@if(session('error'))
+<script>
+Swal.fire({
+    icon: 'error',
+    title: 'Gagal!',
+    text: '{{ session('error') }}',
+    timer: 2500,
+    showConfirmButton: false
+});
+</script>
+@endif
+
 @endsection
