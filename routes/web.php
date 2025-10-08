@@ -30,12 +30,10 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\SupportController;
 
-
 // =========================
 // 🌟 Public / Welcome
 // =========================
 Route::get('/welcome', fn() => view('welcome'));
-
 
 // =========================
 // 🔐 Authentication Routes
@@ -45,7 +43,6 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
 
 // =========================
 // 👤 User Routes (Login Required)
@@ -63,21 +60,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/news', [NewsController::class, 'index'])->name('news');
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 
-    // Buy Tickets (opsional — kalau pakai halaman khusus beli)
-Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
-Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+    // Buy Tickets
+    Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+    Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
+    Route::get('/tickets/purchase/{id}', [TicketController::class, 'purchase'])->name('tickets.purchase');
 
+    // Shop
+    Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+    Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
+});
 
-// =========================
-// 🛍️ Shop Routes (Pengguna)
-// =========================
-Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
-Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
-
-}); // <-- Close the user middleware group
-
-// Form pembelian tiket
-Route::get('/tickets/purchase/{id}', [TicketController::class, 'purchase'])->name('tickets.purchase');
 // =========================
 // 🧑‍💼 Admin Routes
 // =========================
@@ -104,9 +96,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     // Events
     Route::resource('events', AdminEventController::class);
 
-    // Ticket Types
-    Route::resource('ticket-types', TicketTypeController::class)->except(['show', 'create', 'store', 'destroy']);
-    Route::post('ticket-types/update-all', [TicketTypeController::class, 'updateAll'])->name('ticket-types.update-all');
+    // ===============================
+    // 🎟️ Ticket Types (Per Event)
+    // ===============================
+    Route::get('ticket-types', [TicketTypeController::class, 'index'])->name('ticket-types.index');
+    Route::get('ticket-types/{event}/edit', [TicketTypeController::class, 'edit'])->name('ticket-types.edit');
+    Route::post('ticket-types/{event}/store', [TicketTypeController::class, 'store'])->name('ticket-types.store');
+    Route::put('ticket-types/{event}/update/{ticket}', [TicketTypeController::class, 'update'])->name('ticket-types.update');
+    Route::delete('ticket-types/{event}/delete/{ticket}', [TicketTypeController::class, 'destroy'])->name('ticket-types.destroy');
+    Route::get('ticket-types/create', [TicketTypeController::class, 'create'])->name('ticket-types.create');
+
 
     // Orders
     Route::resource('orders', OrderController::class);
