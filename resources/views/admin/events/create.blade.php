@@ -62,7 +62,8 @@
                         </div>
 
                         {{-- Lokasi --}}
-                        <div class="col-md-6">
+                        {{-- Lokasi --}}
+                        <div class="col-md-6 mb-3">
                             <label for="location" class="form-label fw-semibold">Lokasi Event <span
                                     class="text-danger">*</span></label>
                             <input type="text" name="location" id="location"
@@ -72,6 +73,28 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        {{-- Peta Lokasi Dinamis --}}
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-semibold">Preview Lokasi di Peta</label>
+                            <div id="map-container" style="height:250px; border-radius:10px;">
+                                <iframe id="map-frame"
+                                    src="https://www.google.com/maps?q={{ urlencode(old('location', 'Indramayu, Gor Wiralodra')) }}&output=embed"
+                                    width="100%" height="250" style="border:0; border-radius:10px;" allowfullscreen=""
+                                    loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            </div>
+                        </div>
+
+                        <script>
+                            const locationInput = document.getElementById('location');
+                            const mapFrame = document.getElementById('map-frame');
+
+                            locationInput.addEventListener('input', function () {
+                                const query = encodeURIComponent(this.value || 'Indramayu, Gor Wiralodra');
+                                mapFrame.src = `https://www.google.com/maps?q=${query}&output=embed`;
+                            });
+                        </script>
 
                         {{-- Total Tiket --}}
                         <div class="col-md-6">
@@ -106,7 +129,8 @@
                                 <option value="">-- Pilih Venue --</option>
                                 @foreach($venues as $venue)
                                     <option value="{{ $venue->id }}" {{ old('venue_id') == $venue->id ? 'selected' : '' }}>
-                                        {{ $venue->name }}</option>
+                                        {{ $venue->name }}
+                                    </option>
                                 @endforeach
                             </select>
                             @error('venue_id')

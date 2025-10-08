@@ -15,15 +15,17 @@ class Event extends Model
         'date',
         'location',
         'price',
-        'status',
         'total_tickets',
         'available_tickets',
-        'venue_id',
         'poster',
         'vip_tickets',
         'vip_price',
         'reguler_tickets',
         'reguler_price',
+    ];
+
+    protected $casts = [
+        'date' => 'datetime',
     ];
 
     // Relasi ke Order
@@ -36,9 +38,5 @@ class Event extends Model
     public function venue()
     {
         return $this->belongsTo(Venue::class);
-    }
-    public function events()
-    {
-        return $this->hasMany(Event::class);
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\EventController; // ⬅️ Tambahkan ini untuk Buy Tickets
 
 // Admin Controllers
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -41,6 +42,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ======================
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('pengguna.dashboard');
+
+    // Buy Tickets - halaman utama untuk lihat event
+    Route::get('/buy-tickets', [EventController::class, 'index'])->name('buy-tickets');
+
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
@@ -54,7 +59,7 @@ Route::middleware(['auth'])->group(function () {
 // Protected Routes - Admin
 // ======================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
-    
+
     // Dashboard
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
@@ -62,8 +67,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::get('profile', [AdminProfileController::class, 'index'])->name('profile.index');
     Route::put('profile', [AdminProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password.update');
-
-    // Optional: update avatar
     Route::put('profile/avatar', [AdminProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
 
     // Settings
