@@ -30,7 +30,6 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\SupportController;
 
-
 // =========================
 // 🌟 Public Routes
 // =========================
@@ -46,7 +45,6 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
 
 // =========================
 // 👤 USER ROUTES (AUTH REQUIRED)
@@ -65,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/news', [NewsController::class, 'index'])->name('news');
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 
+<<<<<<< HEAD
     // =========================
     // 🛍️ Shop Routes
     // =========================
@@ -82,15 +81,31 @@ Route::middleware(['auth'])->group(function () {
 });
 Route::post('/shop/purchase', [ShopController::class, 'purchase'])->name('shop.purchase');
 
+=======
+    // Buy Tickets
+    Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+    Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
+    Route::get('/tickets/purchase/{id}', [TicketController::class, 'purchase'])->name('tickets.purchase');
+>>>>>>> 620b1c1f09befcadb6835e962a7c88febf2f3c02
 
+    // Shop
+    Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+    Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
+});
 
 // =========================
+<<<<<<< HEAD
 // 🧑‍💼 ADMIN ROUTES
 // =========================
 Route::prefix('admin')
     ->name('admin.')
     ->middleware(['auth', 'isAdmin'])
     ->group(function () {
+=======
+// 🧑‍💼 Admin Routes
+// =========================
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
+>>>>>>> 620b1c1f09befcadb6835e962a7c88febf2f3c02
 
     // Dashboard
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -113,11 +128,24 @@ Route::prefix('admin')
     // Events
     Route::resource('events', AdminEventController::class);
 
+<<<<<<< HEAD
     // Ticket Types
     Route::resource('ticket-types', TicketTypeController::class)
         ->except(['show', 'create', 'store', 'destroy']);
     Route::post('ticket-types/update-all', [TicketTypeController::class, 'updateAll'])
         ->name('ticket-types.update-all');
+=======
+    // ===============================
+    // 🎟️ Ticket Types (Per Event)
+    // ===============================
+    Route::get('ticket-types', [TicketTypeController::class, 'index'])->name('ticket-types.index');
+    Route::get('ticket-types/{event}/edit', [TicketTypeController::class, 'edit'])->name('ticket-types.edit');
+    Route::post('ticket-types/{event}/store', [TicketTypeController::class, 'store'])->name('ticket-types.store');
+    Route::put('ticket-types/{event}/update/{ticket}', [TicketTypeController::class, 'update'])->name('ticket-types.update');
+    Route::delete('ticket-types/{event}/delete/{ticket}', [TicketTypeController::class, 'destroy'])->name('ticket-types.destroy');
+    Route::get('ticket-types/create', [TicketTypeController::class, 'create'])->name('ticket-types.create');
+
+>>>>>>> 620b1c1f09befcadb6835e962a7c88febf2f3c02
 
     // Orders
     Route::resource('orders', OrderController::class);

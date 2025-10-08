@@ -12,22 +12,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->date('date')->nullable();
-            $table->string('location'); // 📍 lokasi event
-            $table->decimal('price', 10, 2); // harga default
+            $table->dateTime('date')->nullable();
+            $table->string('location');
+            $table->decimal('price', 10, 2)->default(0);
             $table->integer('total_tickets')->default(0);
             $table->integer('available_tickets')->default(0);
-
-
-            // Tiket VIP
-            $table->integer('vip_tickets')->nullable();
-            $table->decimal('vip_price', 10, 2)->nullable();
-
-            // Tiket Reguler
-            $table->integer('reguler_tickets')->nullable();
-            $table->decimal('reguler_price', 10, 2)->nullable();
-
-            $table->string('poster')->nullable(); // 🖼️ path poster
+            $table->string('poster')->nullable();
             $table->timestamps();
         });
     }

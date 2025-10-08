@@ -10,6 +10,12 @@ return new class extends Migration
     {
         Schema::create('promotions', function (Blueprint $table) {
             $table->id();
+
+            // Relasi ke ticket_types
+            $table->foreignId('ticket_type_id')
+                ->constrained('ticket_types')
+                ->onDelete('cascade');
+            $table->foreignId('event_id')->nullable()->constrained('events')->onDelete('cascade');
             $table->string('code')->unique(); // Kode promo, misal DISKON10
             $table->string('name'); // Nama promo
             $table->enum('type', ['percentage', 'nominal']); // Jenis promo
