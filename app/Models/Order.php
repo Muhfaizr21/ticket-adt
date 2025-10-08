@@ -10,22 +10,20 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'event_id',
         'user_id',
-        'type',
+        'event_id',
+        'quantity',
         'total_price',
         'status',
     ];
 
-    // Relasi ke Event
-    public function event()
-    {
-        return $this->belongsTo(Event::class);
-    }
-
-    // Relasi ke User
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
     }
 }

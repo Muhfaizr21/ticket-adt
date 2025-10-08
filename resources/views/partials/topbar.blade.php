@@ -16,7 +16,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('shop') }}" class="nav-link {{ request()->routeIs('shop') ? 'active' : '' }}">
+                        <a href="{{ route('shop.index') }}" class="nav-link {{ request()->routeIs('shop') ? 'active' : '' }}">
                             Shop
                         </a>
                     </li>

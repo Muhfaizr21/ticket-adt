@@ -9,13 +9,14 @@ class Ticket extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'event_id',
-        'user_id',
-        'type',
-        'price',
-        'status',
-    ];
+   protected $fillable = [
+    'event_id',
+    'user_id',
+    'type',
+    'price',
+    'status'
+];
+
 
     // Relasi ke Event
     public function event()

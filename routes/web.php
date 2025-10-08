@@ -1,6 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
+// =========================
+// 🧍 Auth & User Controllers
+// =========================
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
@@ -8,9 +12,12 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\EventController; // ⬅️ Tambahkan ini untuk Buy Tickets
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\TicketController;
 
-// Admin Controllers
+// =========================
+// 🧑‍💻 Admin Controllers
+// =========================
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\OrderController;
@@ -23,41 +30,57 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\SupportController;
 
-// ======================
-// Welcome
-// ======================
+
+// =========================
+// 🌟 Public / Welcome
+// =========================
 Route::get('/welcome', fn() => view('welcome'));
 
-// ======================
-// Auth Routes
-// ======================
+
+// =========================
+// 🔐 Authentication Routes
+// =========================
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// ======================
-// Protected Routes - User
-// ======================
+
+// =========================
+// 👤 User Routes (Login Required)
+// =========================
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('pengguna.dashboard');
 
-    // Buy Tickets - halaman utama untuk lihat event
-    Route::get('/buy-tickets', [EventController::class, 'index'])->name('buy-tickets');
-
+    // Profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
-    Route::get('/shop', [ShopController::class, 'index'])->name('shop');
+
+    // Halaman Informasi
     Route::get('/help', [HelpController::class, 'index'])->name('help');
     Route::get('/news', [NewsController::class, 'index'])->name('news');
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');
-});
 
-// ======================
-// Protected Routes - Admin
-// ======================
+    // Buy Tickets (opsional — kalau pakai halaman khusus beli)
+Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
+Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+
+
+// =========================
+// 🛍️ Shop Routes (Pengguna)
+// =========================
+Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
+
+}); // <-- Close the user middleware group
+
+// Form pembelian tiket
+Route::get('/tickets/purchase/{id}', [TicketController::class, 'purchase'])->name('tickets.purchase');
+// =========================
+// 🧑‍💼 Admin Routes
+// =========================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
 
     // Dashboard
