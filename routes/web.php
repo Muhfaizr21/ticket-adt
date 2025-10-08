@@ -12,8 +12,8 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\HelpController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\EventController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\PurchaseController;
 
 // =========================
 // 🧑‍💻 Admin Controllers
@@ -32,25 +32,27 @@ use App\Http\Controllers\Admin\SupportController;
 
 
 // =========================
-// 🌟 Public / Welcome
+// 🌟 Public Routes
 // =========================
 Route::get('/welcome', fn() => view('welcome'));
-
 
 // =========================
 // 🔐 Authentication Routes
 // =========================
 Route::get('/', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
 // =========================
-// 👤 User Routes (Login Required)
+// 👤 USER ROUTES (AUTH REQUIRED)
 // =========================
 Route::middleware(['auth'])->group(function () {
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('pengguna.dashboard');
 
     // Profile
@@ -63,25 +65,32 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/news', [NewsController::class, 'index'])->name('news');
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 
-    // Buy Tickets (opsional — kalau pakai halaman khusus beli)
-Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
-Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+    // =========================
+    // 🛍️ Shop Routes
+    // =========================
+    Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+    Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
+
+    // =========================
+    // 🎟️ Ticket & Purchase
+    // =========================
+    Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
+    Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+
+    // Halaman pembelian tiket
+    Route::get('/purchase/{id}', [PurchaseController::class, 'show'])->name('purchase.show');
+});
+Route::post('/shop/purchase', [ShopController::class, 'purchase'])->name('shop.purchase');
+
 
 
 // =========================
-// 🛍️ Shop Routes (Pengguna)
+// 🧑‍💼 ADMIN ROUTES
 // =========================
-Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
-Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
-
-}); // <-- Close the user middleware group
-
-// Form pembelian tiket
-Route::get('/tickets/purchase/{id}', [TicketController::class, 'purchase'])->name('tickets.purchase');
-// =========================
-// 🧑‍💼 Admin Routes
-// =========================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(function () {
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth', 'isAdmin'])
+    ->group(function () {
 
     // Dashboard
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -105,8 +114,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::resource('events', AdminEventController::class);
 
     // Ticket Types
-    Route::resource('ticket-types', TicketTypeController::class)->except(['show', 'create', 'store', 'destroy']);
-    Route::post('ticket-types/update-all', [TicketTypeController::class, 'updateAll'])->name('ticket-types.update-all');
+    Route::resource('ticket-types', TicketTypeController::class)
+        ->except(['show', 'create', 'store', 'destroy']);
+    Route::post('ticket-types/update-all', [TicketTypeController::class, 'updateAll'])
+        ->name('ticket-types.update-all');
 
     // Orders
     Route::resource('orders', OrderController::class);
