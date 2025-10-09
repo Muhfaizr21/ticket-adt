@@ -13,16 +13,24 @@ return new class extends Migration
 
             // Relasi ke ticket_types
             $table->foreignId('ticket_type_id')
+                ->nullable()
                 ->constrained('ticket_types')
                 ->onDelete('cascade');
-            $table->foreignId('event_id')->nullable()->constrained('events')->onDelete('cascade');
-            $table->string('code')->unique(); // Kode promo, misal DISKON10
-            $table->string('name'); // Nama promo
-            $table->enum('type', ['percentage', 'nominal']); // Jenis promo
-            $table->decimal('value', 10, 2); // Nilai diskon
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->boolean('is_active')->default(true);
+
+            // Relasi ke events (jika diperlukan langsung ke event)
+            $table->foreignId('event_id')
+                ->nullable()
+                ->constrained('events')
+                ->onDelete('cascade');
+
+            $table->string('code')->nullable();
+            $table->string('name')->nullable();
+            $table->decimal('persen_diskon', 10, 2)->nullable();
+            $table->decimal('value', 10, 2)->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->boolean('is_active')->default(1);
+
             $table->timestamps();
         });
     }

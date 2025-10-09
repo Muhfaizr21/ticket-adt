@@ -14,8 +14,6 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->dateTime('date')->nullable();
             $table->string('location');
-            $table->decimal('price', 10, 2)->default(0);
-            $table->integer('total_tickets')->default(0);
             $table->integer('available_tickets')->default(0);
             $table->string('poster')->nullable();
             $table->timestamps();

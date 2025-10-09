@@ -65,4 +65,11 @@ class TicketType extends Model
         }
         return false;
     }
+    /**
+     * Relasi ke Promotions
+     */
+    public function promotions()
+    {
+        return $this->hasMany(Promotion::class, 'ticket_type_id');
+    }
 }

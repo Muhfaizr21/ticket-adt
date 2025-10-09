@@ -10,87 +10,90 @@ use Illuminate\Http\Request;
 class TicketTypeController extends Controller
 {
     /**
-     * 🟢 Tampilkan daftar event beserta tipe tiketnya
+     * 🧾 Tampilkan daftar semua event dan tipe tiket terkait
      */
     public function index()
     {
-        // Ambil semua event beserta ticket type
-        $events = Event::with('ticketTypes')->latest()->get();
+        $events = Event::with('ticketTypes')->get();
         return view('admin.tickets.ticket-types.index', compact('events'));
     }
 
     /**
-     * 🟢 Form untuk mengelola tipe tiket per event
+     * ➕ Form tambah tipe tiket untuk event tertentu
      */
-    public function edit($event_id)
+    public function create($event)
     {
-        $event = Event::with('ticketTypes')->findOrFail($event_id);
-        return view('admin.tickets.ticket-types.edit', compact('event'));
+        $event = Event::findOrFail($event);
+        return view('admin.tickets.ticket-types.create', compact('event'));
     }
 
     /**
-     * 🟢 Simpan tipe tiket baru
+     * 💾 Simpan tipe tiket baru untuk event tertentu
      */
-    public function store(Request $request, $event_id)
+    public function store(Request $request, $event)
     {
-        $event = Event::findOrFail($event_id);
-
-        $request->validate([
-            'name' => 'required|string|max:100',
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'total_tickets' => 'required|integer|min:1',
-            'available_tickets' => 'nullable|integer|min:0',
+            'available_tickets' => 'required|integer|min:0|max:' . $request->total_tickets,
         ]);
 
-        $event->ticketTypes()->create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'total_tickets' => $request->total_tickets,
-            'available_tickets' => $request->available_tickets ?? $request->total_tickets,
-        ]);
+        $eventModel = Event::findOrFail($event);
+        $validated['event_id'] = $eventModel->id;
 
-        return redirect()->route('admin.ticket-types.edit', $event_id)
-            ->with('success', 'Tipe tiket baru berhasil ditambahkan!');
+        TicketType::create($validated);
+
+        return redirect()
+            ->route('admin.ticket-types.index')
+            ->with('success', 'Tipe tiket berhasil ditambahkan untuk event ' . $eventModel->name . '.');
     }
 
     /**
-     * 🟢 Update tipe tiket yang ada
+     * ✏️ Form edit tipe tiket
      */
-    public function update(Request $request, $event_id, $ticket_id)
+    public function edit($event, $ticket)
     {
-        $ticketType = TicketType::where('event_id', $event_id)->findOrFail($ticket_id);
+        $eventModel = Event::findOrFail($event);
+        $ticketType = TicketType::where('event_id', $eventModel->id)
+            ->findOrFail($ticket);
 
-        $request->validate([
-            'name' => 'required|string|max:100',
+        return view('admin.tickets.ticket-types.edit', compact('eventModel', 'ticketType'));
+    }
+
+    /**
+     * 🔄 Update data tipe tiket
+     */
+    public function update(Request $request, $event, $ticket)
+    {
+        $ticketType = TicketType::where('event_id', $event)->findOrFail($ticket);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'total_tickets' => 'required|integer|min:1',
-            'available_tickets' => 'nullable|integer|min:0',
+            'available_tickets' => 'required|integer|min:0|max:' . $request->total_tickets,
         ]);
 
-        $ticketType->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'total_tickets' => $request->total_tickets,
-            'available_tickets' => $request->available_tickets ?? $request->total_tickets,
-        ]);
+        $ticketType->update($validated);
 
-        return redirect()->route('admin.ticket-types.edit', $event_id)
-            ->with('success', 'Tipe tiket berhasil diperbarui!');
+        return redirect()
+            ->route('admin.ticket-types.index')
+            ->with('success', 'Tipe tiket berhasil diperbarui.');
     }
 
     /**
-     * 🔴 Hapus tipe tiket
+     * 🗑️ Hapus tipe tiket
      */
-    public function destroy($event_id, $ticket_id)
+    public function destroy($event, $ticket)
     {
-        $ticketType = TicketType::where('event_id', $event_id)->findOrFail($ticket_id);
+        $ticketType = TicketType::where('event_id', $event)->findOrFail($ticket);
         $ticketType->delete();
 
-        return redirect()->route('admin.ticket-types.edit', $event_id)
-            ->with('success', 'Tipe tiket berhasil dihapus!');
+        return redirect()
+            ->route('admin.ticket-types.index')
+            ->with('success', 'Tipe tiket berhasil dihapus.');
     }
 }

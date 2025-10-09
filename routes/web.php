@@ -13,6 +13,7 @@ use App\Http\Controllers\HelpController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\PurchaseController; // ✅ DITAMBAHKAN (hilang di versi kamu)
 
 // =========================
 // 🧑‍💻 Admin Controllers
@@ -77,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tickets/purchase/{id}', [TicketController::class, 'purchase'])->name('tickets.purchase');
 
     // Halaman pembelian tiket
-    Route::get('/purchase/{id}', [PurchaseController::class, 'show'])->name('purchase.show');
+    //Route::get('/purchase/{id}', [PurchaseController::class, 'show'])->name('purchase.show');
 }); // <-- Tutup middleware user
 
 // =========================
@@ -107,12 +108,25 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::resource('events', AdminEventController::class);
 
     // 🎟️ Ticket Types (Per Event)
-    Route::get('ticket-types', [TicketTypeController::class, 'index'])->name('ticket-types.index');
-    Route::get('ticket-types/{event}/edit', [TicketTypeController::class, 'edit'])->name('ticket-types.edit');
-    Route::post('ticket-types/{event}/store', [TicketTypeController::class, 'store'])->name('ticket-types.store');
-    Route::put('ticket-types/{event}/update/{ticket}', [TicketTypeController::class, 'update'])->name('ticket-types.update');
-    Route::delete('ticket-types/{event}/delete/{ticket}', [TicketTypeController::class, 'destroy'])->name('ticket-types.destroy');
-    Route::get('ticket-types/create', [TicketTypeController::class, 'create'])->name('ticket-types.create');
+    Route::prefix('ticket-types')->name('ticket-types.')->group(function () {
+        // Daftar semua tipe tiket
+        Route::get('/', [TicketTypeController::class, 'index'])->name('index');
+
+        // Form tambah tipe tiket
+        Route::get('/{event}/create', [TicketTypeController::class, 'create'])->name('create');
+
+        // Simpan tipe tiket baru (berdasarkan event)
+        Route::post('/{event}/store', [TicketTypeController::class, 'store'])->name('store');
+
+        // Form edit tipe tiket tertentu
+        Route::get('/{event}/{ticket}/edit', [TicketTypeController::class, 'edit'])->name('edit');
+
+        // Update tipe tiket
+        Route::put('/{event}/{ticket}/update', [TicketTypeController::class, 'update'])->name('update');
+
+        // Hapus tipe tiket
+        Route::delete('/{event}/{ticket}/delete', [TicketTypeController::class, 'destroy'])->name('destroy');
+    });
 
     // Orders
     Route::resource('orders', OrderController::class);
@@ -122,6 +136,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
 
     // Promotions
     Route::resource('promotions', PromotionController::class);
+    Route::put('/admin/promotions/{id}', [PromotionController::class, 'update'])->name('admin.promotions.update');
+
 
     // Venues
     Route::resource('venues', VenueController::class);
