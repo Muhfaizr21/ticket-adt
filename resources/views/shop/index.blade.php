@@ -5,7 +5,7 @@
 @section('content')
 <div class="container my-5">
     <h1 class="mb-5 text-center fw-bold" style="font-size: 2.2rem; color: #1b1b1b;">
-        🛍️ Event yang Tersedia
+     Beberpa Event yang Tersedia
     </h1>
 
     <div class="row justify-content-center g-4">

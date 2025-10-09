@@ -6,7 +6,7 @@
 @section('content')
 <div class="flex justify-between items-center mb-4">
     <h2 class="text-2xl font-semibold">Notifikasi</h2>
-    <form action="{{ route('admin.notifications.readAll') }}" method="POST">
+    <form action="{{ route('admin.notifications.index') }}" method="POST">
         @csrf
         <button class="btn btn-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700">
             Tandai Semua Dibaca
