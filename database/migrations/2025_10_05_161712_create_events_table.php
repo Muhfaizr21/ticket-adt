@@ -13,6 +13,8 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->dateTime('date')->nullable();
+            $table->time('start_time')->nullable(); // waktu mulai
+            $table->time('end_time')->nullable();   // waktu selesai
             $table->string('location');
             $table->integer('available_tickets')->default(0);
             $table->string('poster')->nullable();

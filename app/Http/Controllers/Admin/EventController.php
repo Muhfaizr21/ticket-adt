@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 class EventController extends Controller
 {
     /**
-     * 🟢 Tampilkan semua event (dengan venue dan tipe tiket)
+     * 🟢 Tampilkan semua event
      */
     public function index()
     {
@@ -38,42 +38,44 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'              => 'required|string|max:255',
-            'description'       => 'nullable|string',
-            'date'              => 'nullable|date',
-            'location'          => 'required|string|max:255',
-            'available_tickets' => 'nullable|integer|min:0',
-            'venue_id'          => 'nullable|exists:venues,id',
-            'poster'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'date'        => 'nullable|date',
+            'start_time'  => 'nullable|date_format:H:i',
+            'end_time'    => 'nullable|date_format:H:i|after_or_equal:start_time',
+            'location'    => 'required|string|max:255',
+            'venue_id'    => 'nullable|exists:venues,id',
+            'poster'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         // Upload poster jika ada
         if ($request->hasFile('poster')) {
-            $validated['poster'] = $request->file('poster')
-                ->store('posters/events', 'public');
+            $validated['poster'] = $request->file('poster')->store('posters/events', 'public');
         }
 
-        // Simpan data event ke database
+        // Simpan event
         $event = Event::create($validated);
 
-        // Tambahkan tipe tiket default
+        // Tambahkan tipe tiket default (tanpa available_tickets, nanti bisa ditambah manual di menu tiket)
         $defaultTickets = [
             [
                 'event_id'    => $event->id,
                 'name'        => 'VIP',
                 'description' => 'Akses eksklusif untuk area VIP',
+                'available_tickets' => 0,
             ],
             [
                 'event_id'    => $event->id,
                 'name'        => 'Reguler',
                 'description' => 'Tiket reguler untuk pengunjung umum',
+                'available_tickets' => 0,
             ],
         ];
 
         TicketType::insert($defaultTickets);
 
         return redirect()->route('admin.events.index')
-            ->with('success', '✅ Event baru berhasil ditambahkan dengan tipe tiket default!');
+            ->with('success', '✅ Event baru berhasil ditambahkan!');
     }
 
     /**
@@ -95,28 +97,25 @@ class EventController extends Controller
         $event = Event::findOrFail($id);
 
         $validated = $request->validate([
-            'name'              => 'required|string|max:255',
-            'description'       => 'nullable|string',
-            'date'              => 'nullable|date',
-            'location'          => 'required|string|max:255',
-            'available_tickets' => 'nullable|integer|min:0',
-            'venue_id'          => 'nullable|exists:venues,id',
-            'poster'            => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'date'        => 'nullable|date',
+            'start_time'  => 'nullable|date_format:H:i',
+            'end_time'    => 'nullable|date_format:H:i|after_or_equal:start_time',
+            'location'    => 'required|string|max:255',
+            'venue_id'    => 'nullable|exists:venues,id',
+            'poster'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Jika ada file poster baru
+        // Hapus poster lama jika ada dan diganti baru
         if ($request->hasFile('poster')) {
-            // Hapus poster lama jika ada
             if ($event->poster && Storage::disk('public')->exists($event->poster)) {
                 Storage::disk('public')->delete($event->poster);
             }
 
-            // Upload poster baru
-            $validated['poster'] = $request->file('poster')
-                ->store('posters/events', 'public');
+            $validated['poster'] = $request->file('poster')->store('posters/events', 'public');
         }
 
-        // Update data event
         $event->update($validated);
 
         return redirect()->route('admin.events.index')
@@ -130,7 +129,6 @@ class EventController extends Controller
     {
         $event = Event::findOrFail($id);
 
-        // Hapus poster jika ada
         if ($event->poster && Storage::disk('public')->exists($event->poster)) {
             Storage::disk('public')->delete($event->poster);
         }

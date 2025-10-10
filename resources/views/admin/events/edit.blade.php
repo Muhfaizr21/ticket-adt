@@ -49,12 +49,23 @@
                         @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
-                    {{-- Tanggal Event --}}
+                    {{-- Tanggal & Waktu --}}
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Tanggal Event</label>
-                        <input type="date" name="date" class="form-control @error('date') is-invalid @enderror"
-                            value="{{ old('date', $event->date ? \Carbon\Carbon::parse($event->date)->format('Y-m-d') : '') }}">
+                        <label class="form-label fw-semibold">Tanggal & Waktu Event</label>
+                        <div class="input-group">
+                            <input type="date" name="date" class="form-control @error('date') is-invalid @enderror"
+                                value="{{ old('date', $event->date ? \Carbon\Carbon::parse($event->date)->format('Y-m-d') : '') }}">
+                            <input type="time" name="start_time"
+                                class="form-control @error('start_time') is-invalid @enderror"
+                                value="{{ old('start_time', $event->start_time) }}">
+                            <span class="input-group-text">s/d</span>
+                            <input type="time" name="end_time" class="form-control @error('end_time') is-invalid @enderror"
+                                value="{{ old('end_time', $event->end_time) }}">
+                        </div>
+                        <small class="text-muted">Contoh: 9 Oktober 2025 jam 09.00–12.00</small>
                         @error('date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        @error('start_time') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        @error('end_time') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     {{-- Lokasi Event --}}
@@ -95,16 +106,6 @@
                             <img id="preview" src="#" alt="Preview Poster" class="img-thumbnail d-none"
                                 style="max-height:200px;">
                         </div>
-                    </div>
-
-                    {{-- Waktu Pembuatan & Update --}}
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Dibuat Pada</label>
-                        <input type="text" class="form-control mb-3"
-                            value="{{ $event->created_at ? $event->created_at->format('d-m-Y H:i') : '-' }}" readonly>
-                        <label class="form-label fw-semibold">Diperbarui Pada</label>
-                        <input type="text" class="form-control"
-                            value="{{ $event->updated_at ? $event->updated_at->format('d-m-Y H:i') : '-' }}" readonly>
                     </div>
                 </div>
 

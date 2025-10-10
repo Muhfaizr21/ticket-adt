@@ -32,16 +32,16 @@
                                 <th>#</th>
                                 <th>Event</th>
                                 <th>Venue</th>
-                                <th>Tanggal</th>
+                                <th>Tanggal & Waktu</th>
                                 <th>Tiket Tersedia</th>
                                 <th>Poster</th>
-                                <th>Dibuat</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($events as $event)
                                 <tr>
+                                    {{-- Nomor --}}
                                     <td class="text-center text-muted">{{ $loop->iteration }}</td>
 
                                     {{-- Nama & Deskripsi --}}
@@ -55,9 +55,20 @@
                                         {{ optional($event->venue)->name ?? '-' }}
                                     </td>
 
-                                    {{-- Tanggal --}}
+                                    {{-- Tanggal & Waktu --}}
                                     <td class="text-center">
-                                        {{ $event->date ? \Carbon\Carbon::parse($event->date)->translatedFormat('d F Y') : '-' }}
+                                        @if ($event->date)
+                                            {{ \Carbon\Carbon::parse($event->date)->translatedFormat('d F Y') }}
+                                            @if ($event->start_time && $event->end_time)
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} –
+                                                    {{ \Carbon\Carbon::parse($event->end_time)->format('H:i') }}
+                                                </small>
+                                            @endif
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
                                     </td>
 
                                     {{-- Tiket --}}
@@ -75,11 +86,6 @@
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif
-                                    </td>
-
-                                    {{-- Tanggal dibuat --}}
-                                    <td class="text-center text-muted small">
-                                        {{ $event->created_at?->format('d M Y, H:i') }}
                                     </td>
 
                                     {{-- Aksi --}}
@@ -103,7 +109,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center py-5">
+                                    <td colspan="7" class="text-center py-5">
                                         <i class="bi bi-emoji-frown text-muted fs-2"></i>
                                         <p class="text-muted mt-2 mb-0">Belum ada event yang terdaftar.</p>
                                     </td>
@@ -135,10 +141,6 @@
                 background: linear-gradient(90deg, #6610f2, #007bff);
                 transform: translateY(-2px);
                 color: #fff;
-            }
-
-            .bg-gradient {
-                background: linear-gradient(90deg, #28a745, #20c997);
             }
 
             .table-hover tbody tr:hover {

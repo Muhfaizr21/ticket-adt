@@ -55,15 +55,25 @@
                             @enderror
                         </div>
 
-                        {{-- Tanggal --}}
+                        {{-- Tanggal dan Waktu --}}
                         <div class="col-md-6">
-                            <label for="date" class="form-label fw-semibold">Tanggal Event</label>
-                            <input type="date" name="date" id="date"
-                                class="form-control @error('date') is-invalid @enderror"
-                                value="{{ old('date', date('Y-m-d')) }}">
-                            @error('date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <label for="date" class="form-label fw-semibold">Tanggal & Waktu Event</label>
+                            <div class="input-group">
+                                <input type="date" name="date" id="date"
+                                    class="form-control @error('date') is-invalid @enderror"
+                                    value="{{ old('date', date('Y-m-d')) }}">
+                                <input type="time" name="start_time"
+                                    class="form-control @error('start_time') is-invalid @enderror"
+                                    value="{{ old('start_time') }}">
+                                <span class="input-group-text">s/d</span>
+                                <input type="time" name="end_time"
+                                    class="form-control @error('end_time') is-invalid @enderror"
+                                    value="{{ old('end_time') }}">
+                            </div>
+                            <small class="text-muted">Contoh: 9 Oktober 2025 jam 09.00–12.00</small>
+                            @error('date') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @error('start_time') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            @error('end_time') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         {{-- Lokasi --}}
@@ -78,7 +88,7 @@
                             @enderror
                         </div>
 
-                        {{-- Preview Lokasi (Peta) --}}
+                        {{-- Preview Lokasi --}}
                         <div class="col-md-12 mb-3">
                             <label class="form-label fw-semibold">Preview Lokasi di Peta</label>
                             <div id="map-container" style="height:250px; border-radius:10px;">
@@ -88,6 +98,7 @@
                                     loading="lazy"></iframe>
                             </div>
                         </div>
+
 
                         {{-- Poster --}}
                         <div class="col-md-6 mt-4">

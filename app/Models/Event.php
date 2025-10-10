@@ -4,34 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Event extends Model
 {
     use HasFactory;
 
-    /**
-     * Kolom yang boleh diisi mass-assignment
-     */
     protected $fillable = [
         'name',
         'description',
         'date',
+        'start_time',
+        'end_time',
         'location',
         'available_tickets',
         'poster',
         'venue_id',
     ];
 
-    /**
-     * Cast otomatis
-     */
     protected $casts = [
         'date' => 'datetime',
+        'start_time' => 'datetime:H:i',
+        'end_time' => 'datetime:H:i',
     ];
 
     /**
-     * Relasi ke Venue
-     * Setiap event dimiliki oleh satu venue (opsional)
+     * 🔗 Relasi ke Venue
      */
     public function venue()
     {
@@ -39,8 +37,7 @@ class Event extends Model
     }
 
     /**
-     * Relasi ke TicketType
-     * Satu event bisa memiliki banyak tipe tiket
+     * 🔗 Relasi ke TicketType
      */
     public function ticketTypes()
     {
@@ -48,17 +45,31 @@ class Event extends Model
     }
 
     /**
-     * Relasi ke Order
-     * Satu event bisa memiliki banyak order
+     * 🔗 Relasi ke Order
      */
     public function orders()
     {
         return $this->hasMany(Order::class);
     }
-    // app/Models/Event.php
+
+    /**
+     * 🧮 Hitung total tiket tersedia dari semua tipe tiket
+     */
     public function getAvailableTicketsAttribute()
     {
-        // Menjumlahkan semua 'available_tickets' dari setiap tipe tiket milik event ini
         return $this->ticketTypes()->sum('available_tickets');
+    }
+
+    /**
+     * 🕒 Hitung durasi event dalam jam & menit
+     */
+    public function getDurationAttribute()
+    {
+        if ($this->start_time && $this->end_time) {
+            $start = Carbon::parse($this->start_time);
+            $end = Carbon::parse($this->end_time);
+            return $start->diff($end)->format('%h jam %i menit');
+        }
+        return null;
     }
 }
