@@ -22,6 +22,11 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'phone',
+        'position',
+        'theme',
+        'language',
+        'avatar',
     ];
 
     /**
@@ -59,8 +64,12 @@ class User extends Authenticatable
     {
         return $this->role === 'pengguna';
     }
+
+    /**
+     * Relasi ke tabel Order
+     */
     public function orders()
-{
-    return $this->hasMany(\App\Models\Order::class);
-}
+    {
+        return $this->hasMany(\App\Models\Order::class);
+    }
 }

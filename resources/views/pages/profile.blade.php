@@ -21,10 +21,10 @@
                     </div>
                 @endif
             </div>
-            
+
             <h2 class="profile-name">{{ $userData['user']['name'] }}</h2>
             <p class="profile-email">{{ $userData['user']['email'] }}</p>
-            
+
             <div class="profile-stats">
                 <div class="stat-item">
                     <span class="stat-number">{{ $userData['user']['total_events'] }}</span>
@@ -42,18 +42,23 @@
             <!-- Tabs Navigation -->
             <div class="tabs-nav">
                 <button class="tab-btn active" data-tab="edit-profile">
-                    <i class="bi bi-person"></i>
-                    Edit Profile
+                    <i class="bi bi-person"></i> Edit Profile
                 </button>
                 <button class="tab-btn" data-tab="edit-password">
-                    <i class="bi bi-shield-lock"></i>
-                    Ubah Password
+                    <i class="bi bi-shield-lock"></i> Ubah Password
                 </button>
                 <button class="tab-btn" data-tab="recent-events">
-                    <i class="bi bi-ticket-perforated"></i>
-                    Event Terbaru
+                    <i class="bi bi-ticket-perforated"></i> Event Terbaru
                 </button>
             </div>
+
+            <!-- Alert Message -->
+            @if (session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+            @if ($errors->any())
+                <div class="alert alert-danger">{{ $errors->first() }}</div>
+            @endif
 
             <!-- Tabs Content -->
             <div class="tab-content">
@@ -67,13 +72,12 @@
                     <form class="profile-form" method="POST" action="{{ route('profile.update') }}">
                         @csrf
                         @method('PUT')
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label" for="name">Nama Lengkap</label>
                                 <input type="text" class="form-input" id="name" name="name" value="{{ $userData['user']['name'] }}" required>
                             </div>
-                            
                             <div class="form-group">
                                 <label class="form-label" for="email">Email</label>
                                 <input type="email" class="form-input" id="email" name="email" value="{{ $userData['user']['email'] }}" required>
@@ -85,21 +89,20 @@
                                 <label class="form-label" for="phone">Nomor Telepon</label>
                                 <input type="tel" class="form-input" id="phone" name="phone" value="{{ $userData['user']['phone'] }}">
                             </div>
-                            
                             <div class="form-group">
                                 <label class="form-label" for="joined_date">Tanggal Bergabung</label>
                                 <input type="text" class="form-input" id="joined_date" value="{{ date('d F Y', strtotime($userData['user']['joined_date'])) }}" readonly>
                             </div>
                         </div>
 
+                        {{-- Opsional bio (bisa hapus jika belum dipakai) --}}
                         <div class="form-group">
                             <label class="form-label" for="bio">Bio</label>
                             <textarea class="form-input" id="bio" name="bio" rows="4" placeholder="Ceritakan sedikit tentang diri Anda..."></textarea>
                         </div>
 
                         <button type="submit" class="btn-save">
-                            <i class="bi bi-check-circle"></i>
-                            Simpan Perubahan
+                            <i class="bi bi-check-circle"></i> Simpan Perubahan
                         </button>
                     </form>
                 </div>
@@ -114,7 +117,7 @@
                     <form class="profile-form password-form" method="POST" action="{{ route('profile.password.update') }}">
                         @csrf
                         @method('PUT')
-                        
+
                         <div class="form-group">
                             <label class="form-label" for="current_password">Password Saat Ini</label>
                             <input type="password" class="form-input" id="current_password" name="current_password" required>
@@ -129,13 +132,12 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="confirm_password">Konfirmasi Password Baru</label>
-                            <input type="password" class="form-input" id="confirm_password" name="confirm_password" required>
+                            <label class="form-label" for="new_password_confirmation">Konfirmasi Password Baru</label>
+                            <input type="password" class="form-input" id="new_password_confirmation" name="new_password_confirmation" required>
                         </div>
 
                         <button type="submit" class="btn-save">
-                            <i class="bi bi-shield-check"></i>
-                            Update Password
+                            <i class="bi bi-shield-check"></i> Update Password
                         </button>
                     </form>
                 </div>
@@ -151,9 +153,7 @@
                         <div class="events-list">
                             @foreach($userData['recent_events'] as $event)
                             <div class="event-item">
-                                <div class="event-icon">
-                                    <i class="bi bi-ticket-perforated"></i>
-                                </div>
+                                <div class="event-icon"><i class="bi bi-ticket-perforated"></i></div>
                                 <div class="event-details">
                                     <div class="event-name">{{ $event['event_name'] }}</div>
                                     <div class="event-meta">
@@ -167,22 +167,15 @@
                             </div>
                             @endforeach
                         </div>
-
                         <div style="margin-top: 1.5rem;">
-                            <a href="#" class="btn-edit">
-                                <i class="bi bi-eye"></i>
-                                Lihat Semua Event
-                            </a>
+                            <a href="#" class="btn-edit"><i class="bi bi-eye"></i> Lihat Semua Event</a>
                         </div>
                     @else
                         <div class="empty-state">
                             <i class="bi bi-ticket-perforated"></i>
                             <h3>Belum Ada Event</h3>
                             <p>Anda belum memiliki tiket event apapun.</p>
-                            <a href="#" class="btn-save">
-                                <i class="bi bi-search"></i>
-                                Cari Event
-                            </a>
+                            <a href="#" class="btn-save"><i class="bi bi-search"></i> Cari Event</a>
                         </div>
                     @endif
                 </div>
@@ -202,78 +195,23 @@ document.addEventListener('DOMContentLoaded', function() {
     tabBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             const targetTab = this.getAttribute('data-tab');
-            
-            // Remove active class from all buttons and panes
             tabBtns.forEach(b => b.classList.remove('active'));
             tabPanes.forEach(p => p.classList.remove('active'));
-            
-            // Add active class to current button and pane
             this.classList.add('active');
             document.getElementById(targetTab).classList.add('active');
         });
     });
 
-    // Form submission handling for profile
-    const profileForm = document.querySelector('#edit-profile .profile-form');
-    if (profileForm) {
-        profileForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const submitBtn = profileForm.querySelector('.btn-save');
-            const originalText = submitBtn.innerHTML;
-            
-            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Menyimpan...';
-            submitBtn.disabled = true;
-            
-            setTimeout(() => {
-                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Berhasil Disimpan!';
-                submitBtn.style.background = 'var(--success-color)';
-                
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                    submitBtn.style.background = '';
-                }, 2000);
-            }, 1500);
-        });
-    }
-
-    // Form submission handling for password
-    const passwordForm = document.querySelector('#edit-password .profile-form');
-    if (passwordForm) {
-        passwordForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const submitBtn = passwordForm.querySelector('.btn-save');
-            const originalText = submitBtn.innerHTML;
-            
-            submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Mengupdate...';
-            submitBtn.disabled = true;
-            
-            setTimeout(() => {
-                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Password Diupdate!';
-                submitBtn.style.background = 'var(--success-color)';
-                
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                    submitBtn.style.background = '';
-                    passwordForm.reset();
-                }, 2000);
-            }, 1500);
-        });
-    }
-
     // Password strength indicator
     const passwordInput = document.getElementById('new_password');
     const strengthText = document.getElementById('password-strength');
-    
+
     if (passwordInput && strengthText) {
         passwordInput.addEventListener('input', function() {
             const password = this.value;
             let strength = 'Lemah';
             let strengthClass = 'strength-weak';
-            
+
             if (password.length >= 8) {
                 strength = 'Sedang';
                 strengthClass = 'strength-medium';
@@ -282,24 +220,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 strength = 'Kuat';
                 strengthClass = 'strength-strong';
             }
-            
+
             strengthText.textContent = `Kekuatan password: ${strength}`;
             strengthText.className = `password-strength ${strengthClass}`;
         });
     }
-
-    // Add spin animation
-    const style = document.createElement('style');
-    style.textContent = `
-        .spin {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-    `;
-    document.head.appendChild(style);
 });
 </script>
 @endpush
