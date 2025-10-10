@@ -150,12 +150,6 @@
         <p class="help-subtitle">Temukan jawaban atas pertanyaan Anda atau hubungi tim support kami.</p>
     </div>
 
-    {{-- Search --}}
-    <div class="help-search">
-        <input type="text" placeholder="Cari bantuan..." class="help-search-input">
-        <button class="help-search-btn">Search</button>
-    </div>
-
     {{-- Categories --}}
     <div class="help-categories">
         <div class="help-card">
