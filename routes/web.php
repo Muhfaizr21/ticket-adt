@@ -14,7 +14,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\PurchaseController; // ✅ DITAMBAHKAN (hilang di versi kamu)
-use App\Http\Controllers\Admin\AdminNotificationController;
+
 
 // =========================
 // 🧑‍💻 Admin Controllers
@@ -30,6 +30,8 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\SupportController;
+use App\Http\Controllers\Admin\AdminNewsController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 
 // =========================
 // 🌟 Public Routes
@@ -78,6 +80,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
     Route::get('/tickets/purchase/{id}', [TicketController::class, 'purchase'])->name('tickets.purchase');
 
+    //news
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/news', [NewsController::class, 'index'])->name('news');
+    Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
+});
     // Halaman pembelian tiket
     //Route::get('/purchase/{id}', [PurchaseController::class, 'show'])->name('purchase.show');
 }); // <-- Tutup middleware user
@@ -149,4 +156,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     // Notifications
     Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
 
+    // News Management
+    Route::resource('news', AdminNewsController::class);
 });
