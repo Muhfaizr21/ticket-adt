@@ -14,6 +14,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\PurchaseController; // ✅ DITAMBAHKAN (hilang di versi kamu)
+use App\Http\Controllers\Admin\AdminNotificationController;
 
 // =========================
 // 🧑‍💻 Admin Controllers
@@ -138,11 +139,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::resource('promotions', PromotionController::class);
     Route::put('/admin/promotions/{id}', [PromotionController::class, 'update'])->name('admin.promotions.update');
 
-
     // Venues
     Route::resource('venues', VenueController::class);
 
     // Reports
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
+
+    // Notifications
+    Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+
 });
