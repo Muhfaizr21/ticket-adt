@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\AdminNewsController;
 use App\Http\Controllers\Admin\AdminNotificationController;
+use App\Http\Controllers\Admin\AdminContactController;
 
 // =========================
 // 🌟 Public Routes
@@ -84,6 +85,11 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth'])->group(function () {
     Route::get('/news', [NewsController::class, 'index'])->name('news');
     Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
+
+    //contact
+    Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+
 });
     // Halaman pembelian tiket
     //Route::get('/purchase/{id}', [PurchaseController::class, 'show'])->name('purchase.show');
@@ -158,4 +164,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
 
     // News Management
     Route::resource('news', AdminNewsController::class);
+
+    // Contacts / Aduan Pengguna
+Route::get('contacts', [AdminContactController::class, 'index'])->name('contacts.index');
+Route::get('contacts/{id}', [AdminContactController::class, 'show'])->name('contacts.show');
+Route::delete('contacts/{id}', [AdminContactController::class, 'destroy'])->name('contacts.destroy');
+
 });

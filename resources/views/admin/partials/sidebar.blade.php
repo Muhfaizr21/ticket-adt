@@ -95,6 +95,13 @@
         <span class="menu-text">Manage News</span>
     </a>
 </li>
+<li class="menu-item">
+    <a href="{{ route('admin.contacts.index') }}" class="menu-link {{ request()->is('admin/contacts*') ? 'active' : '' }}">
+        <i class="bi bi-chat-left-text menu-icon"></i>
+        <span class="menu-text">Contacts</span>
+    </a>
+</li>
+
 
                 {{-- 🔔 Notifications --}}
                 @if(Route::has('admin.notifications.index'))
