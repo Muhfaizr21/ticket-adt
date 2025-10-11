@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Milon\Barcode\DNS1D;
+use Illuminate\Support\Facades\Response;
 
 class OrderController extends Controller
 {
@@ -30,8 +32,6 @@ class OrderController extends Controller
     public function create($event_id)
     {
         $event = Event::with('ticketTypes')->findOrFail($event_id);
-
-        // Ambil semua metode pembayaran dari DB
         $paymentMethods = PaymentMethod::all();
 
         return view('orders.create', compact('event', 'paymentMethods'));
@@ -51,7 +51,6 @@ class OrderController extends Controller
         $ticket = TicketType::findOrFail($request->ticket_type_id);
         $finalPrice = $ticket->price;
 
-        // 🔹 Cek promo
         if ($request->promo_code) {
             $promo = Promotion::where('code', $request->promo_code)
                 ->where('is_active', true)
@@ -60,18 +59,15 @@ class OrderController extends Controller
                 ->first();
 
             if ($promo) {
-                if ($promo->persen_diskon) {
-                    $finalPrice -= ($ticket->price * $promo->persen_diskon / 100);
-                } elseif ($promo->value) {
-                    $finalPrice -= $promo->value;
-                }
+                $finalPrice -= $promo->persen_diskon
+                    ? ($ticket->price * $promo->persen_diskon / 100)
+                    : $promo->value ?? 0;
             } else {
                 return back()->with('error', 'Kode promo tidak valid atau kadaluarsa.');
             }
         }
 
         $finalPrice = max($finalPrice, 0);
-
         $barcode = (string) Str::uuid();
 
         $order = Order::create([
@@ -137,10 +133,49 @@ class OrderController extends Controller
     {
         $order = Order::with(['event', 'ticketType', 'payment'])->findOrFail($id);
 
-        if ($order->user_id != Auth::id()) {
-            abort(403);
-        }
+        if ($order->user_id != Auth::id()) abort(403);
 
         return view('orders.show', compact('order'));
+    }
+
+    // 📥 Download barcode tiket
+    public function downloadBarcode($id)
+    {
+        $order = Order::findOrFail($id);
+
+        if (!$order->payment || $order->payment->status !== 'verified') {
+            return redirect()->back()->with('error', 'Barcode hanya bisa diunduh setelah pembayaran diverifikasi.');
+        }
+
+        $barcode = new DNS1D();
+        $barcodeImage = $barcode->getBarcodePNG($order->barcode_code, 'C39+', 3, 100, [0, 0, 0], true);
+
+        $fileName = 'barcode-' . $order->barcode_code . '.png';
+        $fileData = base64_decode($barcodeImage);
+
+        return Response::make($fileData, 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => "attachment; filename={$fileName}",
+        ]);
+    }
+
+    // ✅ Verifikasi tiket (QR Scan) untuk admin
+    public function verifyTicket(Request $request)
+    {
+        $request->validate([
+            'barcode_code' => 'required|string',
+        ]);
+
+        $order = Order::where('barcode_code', $request->barcode_code)->first();
+
+        if (!$order) return response()->json(['status' => 'error', 'message' => 'Tiket tidak ditemukan!']);
+
+        if ($order->checked_in_at) {
+            return response()->json(['status' => 'error', 'message' => 'Tiket sudah digunakan!']);
+        }
+
+        $order->update(['checked_in_at' => now()]);
+
+        return response()->json(['status' => 'success', 'message' => 'Tiket berhasil check-in!', 'order_id' => $order->id]);
     }
 }

@@ -20,10 +20,30 @@
                 <h5 class="fw-bold text-primary">📝 Informasi Order</h5>
                 <hr>
                 <p><strong>Kode Order:</strong> {{ $order->barcode_code }}</p>
+
+                {{-- Barcode --}}
+                <div class="my-3">
+                    @php
+                        use Milon\Barcode\DNS1D;
+                        $barcode = new DNS1D();
+                        $barcode->setStorPath(public_path('barcodes/'));
+                        $barcodeImage = $barcode->getBarcodePNG($order->barcode_code, 'C39+', 2, 80, [0, 0, 0], true);
+                    @endphp
+                    <img src="data:image/png;base64,{{ $barcodeImage }}" alt="Barcode"
+                        class="img-fluid border rounded shadow-sm" style="max-width: 300px;">
+                </div>
+
+                @if ($order->payment && $order->payment->status === 'verified')
+                    <a href="{{ route('orders.downloadBarcode', $order->id) }}" class="btn btn-success mb-3">
+                        <i class="bi bi-download"></i> Download Barcode
+                    </a>
+                @endif
+
                 <p><strong>Event:</strong> {{ $order->event->name ?? '-' }}</p>
                 <p><strong>Tipe Tiket:</strong> {{ $order->ticketType->name ?? '-' }}</p>
                 <p><strong>Jumlah Tiket:</strong> {{ $order->quantity }}</p>
                 <p><strong>Total Harga:</strong> Rp{{ number_format($order->total_price, 0, ',', '.') }}</p>
+
                 @if ($order->ticketType->promotions && $order->ticketType->promotions->count() > 0)
                     <p><strong>Promo:</strong>
                         @foreach ($order->ticketType->promotions as $promo)
@@ -33,12 +53,14 @@
                         @endforeach
                     </p>
                 @endif
+
                 <p><strong>Status Order:</strong>
                     <span
                         class="badge bg-{{ $order->status === 'paid' ? 'success' : ($order->status === 'pending' ? 'warning' : 'danger') }}">
                         {{ ucfirst($order->status) }}
                     </span>
                 </p>
+
                 <p><strong>Status Pembayaran:</strong>
                     @if ($order->payment)
                         <span

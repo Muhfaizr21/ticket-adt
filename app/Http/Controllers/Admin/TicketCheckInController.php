@@ -10,7 +10,7 @@ class TicketCheckInController extends Controller
 {
     public function index()
     {
-        // Semua tiket yang sudah dibayar dan pembayaran verified
+        // Ambil semua tiket yang sudah dibayar dan pembayaran verified
         $orders = Order::with('user', 'payment')
             ->where('status', 'paid')
             ->whereHas('payment', fn($q) => $q->where('status', 'verified'))
@@ -26,26 +26,38 @@ class TicketCheckInController extends Controller
             'barcode_code' => 'required|string'
         ]);
 
-        $order = Order::with('user', 'payment')
-            ->where('barcode_code', $request->barcode_code)
-            ->where('status', 'paid')
-            ->whereHas('payment', fn($q) => $q->where('status', 'verified'))
-            ->first();
+        // Bersihkan barcode
+        $barcode = strtolower(trim($request->barcode_code));
+        $barcode = preg_replace('/[^a-f0-9-]/', '', $barcode); // hanya hex + dash
 
-        if (!$order) return response()->json(['status' => 'error', 'message' => 'Tiket tidak ditemukan atau belum dibayar!']);
+        try {
+            $order = Order::with('user', 'payment')
+                ->where('barcode_code', $barcode)
+                ->where('status', 'paid')
+                ->whereHas('payment', fn($q) => $q->where('status', 'verified'))
+                ->first();
 
-        if ($order->checked_in_at) return response()->json(['status' => 'error', 'message' => 'Tiket sudah digunakan.']);
+            if (!$order) {
+                return response()->json(['status' => 'error', 'message' => 'Tiket tidak ditemukan atau belum dibayar!']);
+            }
 
-        $order->checked_in_at = now();
-        $order->checked_in_by = auth()->id();
-        $order->save();
+            if ($order->checked_in_at) {
+                return response()->json(['status' => 'error', 'message' => 'Tiket sudah digunakan.']);
+            }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Tiket berhasil diverifikasi!',
-            'order_id' => $order->id,
-            'user_name' => $order->user->name,
-            'barcode_code' => $order->barcode_code
-        ]);
+            $order->checked_in_at = now();
+            $order->checked_in_by = auth()->id();
+            $order->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Tiket berhasil diverifikasi!',
+                'order_id' => $order->id,
+                'user_name' => $order->user->name,
+                'barcode_code' => $order->barcode_code
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Server Error: ' . $e->getMessage()]);
+        }
     }
 }

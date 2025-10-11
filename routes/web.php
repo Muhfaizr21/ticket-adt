@@ -55,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
     // 🏠 Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('pengguna.dashboard');
 
-    // 🎫 Beli tiket langsung dari dashboard
+    // 🎫 Beli tiket
     Route::get('/tickets/buy/{event_id}/{ticket_type_id}', [DashboardController::class, 'buyTicket'])->name('tickets.buy');
 
     // 👤 Profile
@@ -63,7 +63,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
-    // 📢 Informasi & Bantuan
+    // 📢 Info & Bantuan
     Route::get('/help', [HelpController::class, 'index'])->name('help');
     Route::get('/news', [NewsController::class, 'index'])->name('news');
     Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
@@ -73,7 +73,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
     Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
 
-    // 🧾 Orders (User)
+    // 🧾 Orders
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
         Route::get('/create/{event}', [OrderController::class, 'create'])->name('create');
@@ -82,9 +82,10 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/upload', [OrderController::class, 'uploadForm'])->name('upload');
         Route::post('/{id}/upload', [OrderController::class, 'uploadPayment'])->name('upload.store');
+        Route::get('/{id}/barcode/download', [OrderController::class, 'downloadBarcode'])->name('downloadBarcode');
     });
 
-    // 🎟 Ticket Verification (Scan QR)
+    // 🎟 Ticket Verification (QR Scan)
     Route::post('/tickets/verify', [OrderController::class, 'verifyTicket'])->name('tickets.verify');
 
     // 🎫 Tickets
@@ -113,10 +114,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::put('settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme.update');
 
-    // 💬 Support / Help
+    // 💬 Support
     Route::get('support', [SupportController::class, 'index'])->name('support.index');
 
-    // Halaman check-in admin
+    // 🎫 Check-in tiket realtime
     Route::get('tickets/check-in', [TicketCheckInController::class, 'index'])->name('tickets.check-in');
     Route::post('tickets/check-in', [TicketCheckInController::class, 'verify'])->name('tickets.verify');
 
@@ -133,7 +134,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
         Route::delete('/{event}/{ticket}/delete', [TicketTypeController::class, 'destroy'])->name('destroy');
     });
 
-    // 🧾 Orders (Admin)
+    // 🧾 Orders Admin
     Route::resource('orders', AdminOrderController::class);
     Route::post('orders/{id}/verify-payment', [AdminOrderController::class, 'verifyPayment'])->name('orders.verify-payment');
 
@@ -150,7 +151,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
 
-    // 🏦 Payment Methods (Admin)
+    // 🏦 Payment Methods
     Route::prefix('payment-methods')->name('payment_methods.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'create'])->name('create');
@@ -163,6 +164,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     // 🔔 Notifications
     Route::get('notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
 
-    // 📰 News Management
+    // 📰 News
     Route::resource('news', AdminNewsController::class);
 });
