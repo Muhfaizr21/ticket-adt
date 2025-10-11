@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Auth;
+@endphp
+
 <header class="topbar">
     <div class="topbar-left">
         <button class="menu-toggle">

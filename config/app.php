@@ -181,8 +181,11 @@ return [
     |
     */
 
-    'aliases' => Facade::defaultAliases()->merge([
-        // 'Example' => App\Facades\Example::class,
-    ])->toArray(),
+    'aliases' => [
+        'App' => Illuminate\Support\Facades\App::class,
+        'Route' => Illuminate\Support\Facades\Route::class,
+        'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class, // ← tambahkan ini
+    ],
+
 
 ];

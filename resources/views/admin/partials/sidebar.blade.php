@@ -23,7 +23,6 @@
                 <li class="menu-item">
                     <a href="{{ route('admin.events.index') }}"
                         class="menu-link {{ request()->is('admin/events*') ? 'active' : '' }}">
-
                         <i class="bi bi-calendar-event menu-icon"></i>
                         <span class="menu-text">Events</span>
                     </a>
@@ -33,6 +32,13 @@
                         class="menu-link {{ request()->is('admin/orders*') ? 'active' : '' }}">
                         <i class="bi bi-ticket-perforated menu-icon"></i>
                         <span class="menu-text">Ticket Orders</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.tickets.check-in') }}"
+                        class="menu-link {{ request()->is('admin/tickets/check-in*') ? 'active' : '' }}">
+                        <i class="bi bi-qr-code-scan menu-icon"></i>
+                        <span class="menu-text">Ticket Check-In</span>
                     </a>
                 </li>
                 <li class="menu-item">
@@ -76,6 +82,13 @@
                         <span class="menu-text">Reports</span>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ route('admin.payment_methods.index') }}"
+                        class="menu-link {{ request()->is('admin/payment_methods*') ? 'active' : '' }}">
+                        <i class="bi bi-credit-card-2-front-fill menu-icon"></i>
+                        <span class="menu-text">Metode Pembayaran</span>
+                    </a>
+                </li>
             </ul>
         </div>
 
@@ -90,24 +103,27 @@
                     </a>
                 </li>
                 <li class="menu-item">
-    <a href="{{ route('admin.news.index') }}" class="menu-link {{ request()->is('admin/news*') ? 'active' : '' }}">
-        <i class="bi bi-newspaper menu-icon"></i>
-        <span class="menu-text">Manage News</span>
-    </a>
-</li>
+                    <a href="{{ route('admin.news.index') }}"
+                        class="menu-link {{ request()->is('admin/news*') ? 'active' : '' }}">
+                        <i class="bi bi-newspaper menu-icon"></i>
+                        <span class="menu-text">Manage News</span>
+                    </a>
+                </li>
 
                 {{-- 🔔 Notifications --}}
                 @if(Route::has('admin.notifications.index'))
-                <li class="menu-item">
-                    <a href="{{ route('admin.notifications.index') }}" class="menu-link {{ request()->is('admin/notifications*') ? 'active' : '' }}">
-                        <i class="bi bi-bell-fill menu-icon"></i>
-                        <span class="menu-text">Notifications</span>
-                    </a>
-                </li>
+                    <li class="menu-item">
+                        <a href="{{ route('admin.notifications.index') }}"
+                            class="menu-link {{ request()->is('admin/notifications*') ? 'active' : '' }}">
+                            <i class="bi bi-bell-fill menu-icon"></i>
+                            <span class="menu-text">Notifications</span>
+                        </a>
+                    </li>
                 @endif
 
                 <li class="menu-item">
-                    <a href="{{ route('admin.support.index') }}" class="menu-link {{ request()->is('admin/support*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.support.index') }}"
+                        class="menu-link {{ request()->is('admin/support*') ? 'active' : '' }}">
                         <i class="bi bi-question-circle-fill menu-icon"></i>
                         <span class="menu-text">Help & Support</span>
                     </a>

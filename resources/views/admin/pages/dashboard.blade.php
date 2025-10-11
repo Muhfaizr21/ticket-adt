@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Auth;
+@endphp
+
 @extends('admin.layouts.app')
 
 @section('title', 'Dashboard')

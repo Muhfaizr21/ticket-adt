@@ -7,16 +7,19 @@
                     <img src="{{ asset('images/ikon.png') }}" alt="MyApp Logo" class="logo-image">
                 </a>
             </div>
+
             <!-- Navigation Menu -->
             <nav class="nav-menu">
                 <ul class="nav-list">
                     <li class="nav-item">
-                        <a href="{{ route('pengguna.dashboard') }}" class="nav-link {{ request()->routeIs('pengguna.dashboard') ? 'active' : '' }}">
+                        <a href="{{ route('pengguna.dashboard') }}"
+                            class="nav-link {{ request()->routeIs('pengguna.dashboard') ? 'active' : '' }}">
                             Buy Tickets
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('shop.index') }}" class="nav-link {{ request()->routeIs('shop') ? 'active' : '' }}">
+                        <a href="{{ route('shop.index') }}"
+                            class="nav-link {{ request()->routeIs('shop.index') ? 'active' : '' }}">
                             Shop
                         </a>
                     </li>
@@ -31,7 +34,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('contact') }}" class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">
+                        <a href="{{ route('contact') }}"
+                            class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">
                             Contact
                         </a>
                     </li>
@@ -40,9 +44,9 @@
 
             <!-- Right Side Actions -->
             <div class="topbar-actions">
-                <!-- My Basket -->
+                <!-- 🛒 My Basket -->
                 <div class="basket">
-                    <a href="#" class="basket-link">
+                    <a href="{{ route('orders.index') }}" class="basket-link">
                         <i class="bi bi-bag"></i>
                         <span class="basket-count">0</span>
                     </a>
@@ -58,29 +62,24 @@
                     <div class="dropdown-menu">
                         @auth
                             <a href="{{ route('profile') }}" class="dropdown-item">
-                                <i class="bi bi-person"></i>
-                                My Profile
+                                <i class="bi bi-person"></i> My Profile
                             </a>
-                            <a href="#" class="dropdown-item">
-                                <i class="bi bi-ticket-perforated"></i>
-                                My Tickets
+                            <a href="{{ route('orders.index') }}" class="dropdown-item">
+                                <i class="bi bi-ticket-perforated"></i> My Tickets
                             </a>
                             <div class="dropdown-divider"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="dropdown-item logout-btn">
-                                    <i class="bi bi-box-arrow-right"></i>
-                                    Sign Out
+                                    <i class="bi bi-box-arrow-right"></i> Sign Out
                                 </button>
                             </form>
                         @else
                             <a href="{{ route('login') }}" class="dropdown-item">
-                                <i class="bi bi-box-arrow-in-right"></i>
-                                Sign In
+                                <i class="bi bi-box-arrow-in-right"></i> Sign In
                             </a>
                             <a href="{{ route('register') }}" class="dropdown-item">
-                                <i class="bi bi-person-plus"></i>
-                                Sign Up
+                                <i class="bi bi-person-plus"></i> Sign Up
                             </a>
                         @endauth
                     </div>

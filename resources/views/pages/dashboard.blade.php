@@ -108,14 +108,25 @@
                                             </div>
                                             <div class="ticket-price">
                                                 @if($ticket['has_promo'])
-                                                    <span class="price discounted">{{ $ticket['final_price'] }}</span>
-                                                    <span class="original">{{ $ticket['original_price'] }}</span>
+                                                    <span class="price discounted">
+                                                        Rp {{ number_format((float) ($ticket['final_price'] ?? 0), 0, ',', '.') }}
+                                                    </span>
+                                                    <span class="original">
+                                                        Rp {{ number_format((float) ($ticket['original_price'] ?? 0), 0, ',', '.') }}
+                                                    </span>
                                                     <span class="promo-badge">Promo: {{ $ticket['promo_name'] }}</span>
                                                     <small class="promo-end">s.d {{ $ticket['promo_end'] }}</small>
                                                 @else
-                                                    <span class="price">{{ $ticket['final_price'] }}</span>
+                                                    <span class="price">
+                                                        Rp {{ number_format((float) ($ticket['final_price'] ?? 0), 0, ',', '.') }}
+                                                    </span>
                                                 @endif
-                                                <button class="btn-ticket">Pilih</button>
+
+                                                <!-- Tombol pilih tiket diarahkan ke route pembelian -->
+                                                <a href="{{ route('tickets.buy', ['event_id' => $event['id'], 'ticket_type_id' => $ticket['id']]) }}"
+                                                    class="btn btn-primary btn-ticket mt-2">
+                                                    Pilih
+                                                </a>
                                             </div>
                                         </div>
                                     @endforeach
@@ -144,22 +155,6 @@
                         <div class="more-events-section">
                             <div class="more-events-header">
                                 <h2 class="section-title">Event serupa lainnya</h2>
-                                <div class="events-filters">
-                                    <select class="events-filter-select">
-                                        <option>Hari kerja ▼</option>
-                                        <option>Weekend</option>
-                                    </select>
-                                    <select class="events-filter-select">
-                                        <option>Jenis event ▼</option>
-                                        <option>Festival</option>
-                                        <option>Konser</option>
-                                    </select>
-                                    <select class="events-filter-select">
-                                        <option>Semua kategori ▼</option>
-                                        <option>Musik</option>
-                                        <option>Seni</option>
-                                    </select>
-                                </div>
                             </div>
                             <div class="events-grid">
                                 @foreach ($event['similar_events'] as $sim)
@@ -168,38 +163,21 @@
                                             <div class="event-price-badge">
                                                 <span>From</span> Rp {{ $sim['price'] ?? '450' }}k
                                             </div>
-                                            <div class="event-actions">
-                                                <div class="event-plus">+</div>
-                                                <div class="event-favorite">
-                                                    <i class="bi bi-heart"></i>
-                                                </div>
-                                            </div>
                                             <div class="event-image">
                                                 <img src="{{ asset('storage/' . $sim['image']) }}" alt="{{ $sim['title'] }}">
                                             </div>
                                         </div>
                                         <div class="event-content">
-                                            <div class="event-from">
-                                                <span>From</span>
-                                                <span>ID</span>
-                                            </div>
-                                            <div class="event-date">
-                                                @php
-                                                    $dateNumber = explode(' ', $sim['date'])[0];
-                                                @endphp
-                                                <span class="date-badge">{{ $dateNumber }}</span>
-                                                <span class="date-text">{{ $sim['date'] }}</span>
-                                            </div>
                                             <h3 class="event-title">{{ $sim['title'] }}</h3>
                                             <p class="event-description-short">{{ $sim['description'] }}</p>
                                             <div class="event-time">
                                                 <i class="bi bi-clock"></i>
                                                 <span>{{ $sim['time'] }}</span>
                                             </div>
-                                            <button class="btn-buy-ticket">
-                                                <i class="bi bi-ticket-perforated"></i>
-                                                Beli Tiket
-                                            </button>
+                                            <a href="{{ route('tickets.show', $sim['id']) }}"
+                                                class="btn btn-outline-primary btn-buy-ticket">
+                                                <i class="bi bi-ticket-perforated"></i> Beli Tiket
+                                            </a>
                                         </div>
                                     </div>
                                 @endforeach
