@@ -16,15 +16,6 @@
             <input type="text" class="search-input" placeholder="Search...">
         </div>
 
-        <!-- Theme Toggle -->
-        <div class="theme-toggle me-3">
-            <label class="form-check form-switch mb-0">
-                <input class="form-check-input" type="checkbox" id="theme-toggle-switch" 
-                    {{ auth()->user()->theme === 'dark' ? 'checked' : '' }}>
-                <span class="form-check-label">Mode Gelap</span>
-            </label>
-        </div>
-
         <!-- Notifications & Messages -->
         <button class="action-btn me-2" title="Notifications">
             <i class="bi bi-bell-fill"></i>
@@ -38,10 +29,18 @@
 
         <!-- User Menu -->
         <div class="user-menu">
-            <div class="user-avatar-sm">{{ strtoupper(substr(Auth::user()->name, 0, 2)) }}</div>
+            <div class="user-avatar-sm">
+                @if(Auth::user()->avatar)
+                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="avatar-img">
+                @else
+                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                @endif
+            </div>
             <div class="user-details-sm">
                 <div class="user-name-sm">{{ Auth::user()->name }}</div>
-                <div class="user-role-sm">Administrator</div>
+                <div class="user-role-sm">
+                    {{ ucfirst(Auth::user()->role) }}
+                </div>
             </div>
             <i class='bx bx-chevron-down'></i>
 
@@ -72,31 +71,28 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Theme toggle JS
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeSwitch = document.getElementById('theme-toggle-switch');
-            const body = document.body;
-            if(themeSwitch){
-                themeSwitch.addEventListener('change', function(){
-                    if(this.checked){
-                        body.classList.add('dark'); body.classList.remove('light');
-                    } else {
-                        body.classList.add('light'); body.classList.remove('dark');
-                    }
-
-                    // Simpan tema via AJAX
-                    fetch("{{ route('admin.settings.update') }}", {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ theme: this.checked ? 'dark' : 'light' })
-                    });
-                });
-            }
-        });
-    </script>
 </header>
+
+<style>
+.user-avatar-sm {
+    width: 40px;
+    height: 40px;
+    background: #4f46e5;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    overflow: hidden;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.user-avatar-sm img.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+</style>

@@ -5,9 +5,6 @@
 
 @push('styles')
 <style>
-    /* ===========================
-       GLOBAL STYLE
-    =========================== */
     body {
         font-family: 'Poppins', sans-serif;
     }
@@ -18,9 +15,6 @@
         padding: 70px 20px;
     }
 
-    /* ===========================
-       HERO / HEADER
-    =========================== */
     .contact-hero {
         text-align: center;
         margin-bottom: 60px;
@@ -43,9 +37,6 @@
         line-height: 1.6;
     }
 
-    /* ===========================
-       GRID LAYOUT
-    =========================== */
     .contact-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -67,9 +58,6 @@
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     }
 
-    /* ===========================
-       CONTACT INFO LEFT
-    =========================== */
     .info-title {
         font-size: 1.8rem;
         font-weight: 700;
@@ -117,9 +105,6 @@
         transform: translateY(-3px);
     }
 
-    /* ===========================
-       CONTACT FORM RIGHT
-    =========================== */
     .form-title {
         font-size: 1.8rem;
         font-weight: 700;
@@ -182,20 +167,68 @@
         transform: translateY(-2px);
     }
 
-    /* ===========================
-       RESPONSIVE
-    =========================== */
     @media (max-width: 992px) {
         .contact-grid {
             grid-template-columns: 1fr;
         }
     }
+
+    .fade-in {
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(30px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
 </style>
 @endpush
 
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('contactForm');
+
+    form.addEventListener('submit', function (e) {
+        const name = document.getElementById('name').value.trim();
+        const subject = document.getElementById('subject').value.trim();
+        const message = document.getElementById('message').value.trim();
+
+        if (!name || !subject || !message) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Form tidak lengkap!',
+                text: 'Harap isi semua kolom sebelum mengirim.',
+                confirmButtonColor: '#2563eb'
+            });
+        }
+    });
+
+    @if(session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: '{{ session('success') }}',
+        confirmButtonColor: '#2563eb'
+    });
+    @endif
+
+    @if(session('error'))
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: '{{ session('error') }}',
+        confirmButtonColor: '#2563eb'
+    });
+    @endif
+});
+</script>
+@endpush
+
 @section('content')
-<section class="contact-section">
-    <!-- Hero Section -->
+<section class="contact-section fade-in">
     <div class="contact-hero">
         <h1 class="contact-title">Contact Us</h1>
         <p class="contact-subtitle">
@@ -204,9 +237,8 @@
         </p>
     </div>
 
-    <!-- Grid Section -->
     <div class="contact-grid">
-        <!-- Kolom Kiri -->
+        <!-- Kiri -->
         <div class="contact-info">
             <h2 class="info-title">Informasi Kontak</h2>
             <p class="info-text"><i class="bi bi-geo-alt-fill"></i> Jl. Merdeka No. 45, Cirebon, Indonesia</p>
@@ -221,18 +253,18 @@
             </div>
         </div>
 
-        <!-- Kolom Kanan -->
+        <!-- Kanan -->
         <div class="contact-form">
             <h2 class="form-title">Kirim Pesan</h2>
-            <form action="#" method="POST">
+            <form id="contactForm" action="{{ route('contact.store') }}" method="POST">
                 @csrf
                 <div class="form-group">
                     <label for="name">Nama Lengkap</label>
-                    <input type="text" id="name" name="name" placeholder="Masukkan nama Anda" required>
+                    <input type="text" id="name" name="name" value="{{ Auth::user()->name }}" placeholder="Masukkan nama Anda" required>
                 </div>
                 <div class="form-group">
                     <label for="email">Alamat Email</label>
-                    <input type="email" id="email" name="email" placeholder="Masukkan email aktif" required>
+                    <input type="email" id="email" name="email" value="{{ Auth::user()->email }}" readonly>
                 </div>
                 <div class="form-group">
                     <label for="subject">Subjek</label>

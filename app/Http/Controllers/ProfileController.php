@@ -4,67 +4,75 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
     /**
-     * Display user profile
+     * Tampilkan halaman profil
      */
     public function index()
     {
-        // Data dummy untuk profile
+        $user = Auth::user();
+
         $userData = [
             'user' => [
-                'id' => 1,
-                'name' => 'Ahmad Rizki',
-                'email' => 'ahmad.rizki@example.com',
-                'phone' => '+62 812-3456-7890',
-                'avatar' => null,
-                'joined_date' => '2023-01-15',
-                'total_events' => 12,
-                'total_tickets' => 24,
-                'member_since' => '1 tahun 2 bulan'
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'avatar' => $user->avatar,
+                'joined_date' => $user->created_at,
+                'total_events' => 0, // sementara (nanti bisa ambil dari relasi)
+                'total_tickets' => 0
             ],
-            'recent_events' => [
-                [
-                    'event_name' => 'DWP 2024 - Djakarta Warehouse Project',
-                    'date' => '2024-12-15',
-                    'ticket_type' => 'VIP 2 Days',
-                    'status' => 'confirmed'
-                ],
-                [
-                    'event_name' => 'We The Fest 2024',
-                    'date' => '2024-08-20',
-                    'ticket_type' => 'General Admission',
-                    'status' => 'confirmed'
-                ],
-                [
-                    'event_name' => 'Java Jazz Festival 2024',
-                    'date' => '2024-03-05',
-                    'ticket_type' => 'Gold Pass',
-                    'status' => 'completed'
-                ]
-            ]
+            'recent_events' => [] // nanti juga bisa ambil dari tabel events/tickets
         ];
 
         return view('pages.profile', compact('userData'));
     }
 
     /**
-     * Update user profile
+     * Update data profil user
      */
     public function update(Request $request)
     {
-        // Logic untuk update profile akan ditambahkan nanti
-        return back()->with('success', 'Profile updated successfully!');
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        $user = Auth::user();
+        $user->name  = $request->name;
+        $user->email = $request->email;
+        $user->phone = $request->phone;
+        $user->save();
+
+        return back()->with('success', '');
     }
 
     /**
-     * Update password
+     * Update password user
      */
     public function updatePassword(Request $request)
     {
-        // Logic untuk update password akan ditambahkan nanti
-        return back()->with('success', 'Password updated successfully!');
+        $request->validate([
+            'current_password' => 'required',
+            'new_password'     => 'required|min:8|confirmed', // pastikan ada confirm
+        ]);
+
+        $user = Auth::user();
+
+        // cek password lama
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Password saat ini salah ❌']);
+        }
+
+        // update password
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return back()->with('success', 'Password berhasil diperbarui 🔐');
     }
 }

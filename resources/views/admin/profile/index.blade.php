@@ -10,7 +10,7 @@
         </div>
         <div class="col-auto">
             <nav aria-label="breadcrumb">
-                
+
             </nav>
         </div>
     </div>
@@ -348,7 +348,7 @@
             width: 120px;
             height: 120px;
         }
-        
+
         .card-body {
             padding: 1.25rem;
         }
@@ -364,7 +364,7 @@
         reader.onload = function() {
             const output = document.getElementById('profileImage');
             output.src = reader.result;
-            
+
             // Add animation to image
             output.classList.add('animate__animated', 'animate__pulse');
             setTimeout(() => {
@@ -373,14 +373,14 @@
         };
         reader.readAsDataURL(event.target.files[0]);
     }
-    
+
     // Toggle password visibility
     document.querySelectorAll('.toggle-password').forEach(button => {
         button.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
             const passwordInput = document.getElementById(targetId);
             const icon = this.querySelector('i');
-            
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 icon.classList.remove('fa-eye');
@@ -392,22 +392,22 @@
             }
         });
     });
-    
+
     // Add animation to form submission
     document.getElementById('profileForm').addEventListener('submit', function(e) {
         const button = this.querySelector('button[type="submit"]');
         button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...';
         button.disabled = true;
-        
+
         // Add animation
         this.classList.add('animate__animated', 'animate__pulse');
     });
-    
+
     document.getElementById('passwordForm').addEventListener('submit', function(e) {
         const button = this.querySelector('button[type="submit"]');
         button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memperbarui...';
         button.disabled = true;
-        
+
         // Add animation
         this.classList.add('animate__animated', 'animate__pulse');
     });

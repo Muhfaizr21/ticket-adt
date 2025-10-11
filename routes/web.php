@@ -31,8 +31,7 @@ use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\AdminNewsController;
 use App\Http\Controllers\Admin\AdminNotificationController;
-use App\Http\Controllers\Admin\PaymentMethodController;
-use App\Http\Controllers\Admin\TicketCheckInController;
+
 // =========================
 // 🌟 PUBLIC ROUTES
 // =========================
@@ -95,6 +94,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
     Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
     Route::get('/tickets/purchase/{id}', [TicketController::class, 'purchase'])->name('tickets.purchase');
+
+    //news
+    Route::middleware(['auth'])->group(function () {
+    Route::get('/news', [NewsController::class, 'index'])->name('news');
+    Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
 });
 
 // =========================
@@ -168,15 +172,4 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
 
     // 📰 News Management
     Route::resource('news', AdminNewsController::class);
-
-    // 💳 Payment Methods Management
-    Route::prefix('payment-methods')->name('payment_methods.')->group(function () {
-        Route::get('/', [PaymentMethodController::class, 'index'])->name('index');           // List
-        Route::get('/create', [PaymentMethodController::class, 'create'])->name('create');   // Form tambah
-        Route::post('/', [PaymentMethodController::class, 'store'])->name('store');          // Simpan baru
-        Route::get('/{id}/edit', [PaymentMethodController::class, 'edit'])->name('edit');    // Form edit
-        Route::put('/{id}', [PaymentMethodController::class, 'update'])->name('update');     // Update
-        Route::delete('/{id}', [PaymentMethodController::class, 'destroy'])->name('destroy'); // Hapus
-    });
-
 });
