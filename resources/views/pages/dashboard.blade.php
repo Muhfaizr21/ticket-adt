@@ -123,7 +123,7 @@
                                                 @endif
 
                                                 <!-- Tombol pilih tiket diarahkan ke route pembelian -->
-                                                <a href="{{ route('tickets.buy', ['event_id' => $event['id'], 'ticket_type_id' => $ticket['id']]) }}"
+                                                <a href="{{ route('orders.create', ['event' => $event['id'], 'ticket_type' => $ticket['id']]) }}"
                                                     class="btn btn-primary btn-ticket mt-2">
                                                     Pilih
                                                 </a>

@@ -6,7 +6,6 @@
 <div class="container py-5">
     <h2 class="fw-bold mb-4">🛒 Buat Order Baru</h2>
 
-    {{-- Flash Messages --}}
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
@@ -20,31 +19,30 @@
                 @csrf
                 <input type="hidden" name="event_id" value="{{ $event->id }}">
 
-                {{-- Pilih Tipe Tiket --}}
+                {{-- Tipe Tiket --}}
                 <div class="mb-3">
                     <label for="ticket_type_id" class="form-label fw-semibold">Tipe Tiket</label>
                     <select name="ticket_type_id" id="ticket_type_id" class="form-select" required>
                         <option value="">-- Pilih Tipe Tiket --</option>
                         @foreach($event->ticketTypes as $ticket)
                             <option value="{{ $ticket->id }}">
-                                {{ $ticket->name }} - Rp{{ number_format($ticket->price, 0, ',', '.') }}
+                                {{ $ticket->name }} - Rp{{ number_format($ticket->price,0,',','.') }}
                                 (Tersisa: {{ $ticket->available_tickets }})
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                {{-- Jumlah Tiket --}}
+                {{-- Jumlah --}}
                 <div class="mb-3">
                     <label for="quantity" class="form-label fw-semibold">Jumlah Tiket</label>
                     <input type="number" name="quantity" id="quantity" class="form-control" min="1" value="1" required>
                 </div>
 
-                {{-- Promo Code --}}
+                {{-- Promo --}}
                 <div class="mb-3">
                     <label for="promo_code" class="form-label fw-semibold">Kode Promo (Opsional)</label>
-                    <input type="text" name="promo_code" id="promo_code" class="form-control"
-                           placeholder="Masukkan kode promo jika ada">
+                    <input type="text" name="promo_code" id="promo_code" class="form-control" placeholder="Masukkan kode promo jika ada">
                 </div>
 
                 {{-- Metode Pembayaran --}}
@@ -53,14 +51,14 @@
                     <select name="payment_method" id="payment_method" class="form-select" required>
                         <option value="">-- Pilih Metode Pembayaran --</option>
                         @foreach($paymentMethods as $method)
-                            <option value="{{ $method['id'] }}" data-type="{{ $method['type'] }}">
-                                {{ $method['name'] }} {{ $method['type'] === 'qris' ? '(QRIS)' : '' }}
+                            <option value="{{ $method->id }}" data-type="{{ $method->type }}">
+                                {{ $method->name }} {{ $method->type === 'qris' ? '(QRIS)' : '' }}
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                {{-- Info Rekening / QRIS --}}
+                {{-- Info Bank / QRIS --}}
                 <div id="payment-info" class="mb-3" style="display:none;">
                     <div id="bank-info" style="display:none;">
                         <p><strong>No. Rekening:</strong> <span id="account-number"></span></p>
@@ -78,8 +76,6 @@
     </div>
 </div>
 
-{{-- Script --}}
-@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const paymentMethods = @json($paymentMethods);
@@ -108,16 +104,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if(selected.type === 'bank') {
             bankInfo.style.display = 'block';
             qrisInfo.style.display = 'none';
-            accountNumber.innerText = selected.account_number;
-            accountName.innerText = selected.account_name;
+            accountNumber.innerText = selected.account_number || '-';
+            accountName.innerText = selected.account_name || '-';
         } else if(selected.type === 'qris') {
             bankInfo.style.display = 'none';
             qrisInfo.style.display = 'block';
-            qrisImage.src = '/storage/' + selected.qr_code_image;
+            qrisImage.src = selected.qr_code_image ? '/storage/' + selected.qr_code_image : '';
         }
     });
 });
 </script>
-@endpush
-
 @endsection

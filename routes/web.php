@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\AdminNewsController;
 use App\Http\Controllers\Admin\AdminNotificationController;
+use App\Http\Controllers\Admin\TicketCheckInController;
 
 // =========================
 // 🌟 PUBLIC ROUTES
@@ -72,17 +73,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
     Route::get('/shop/{id}', [ShopController::class, 'show'])->name('shop.show');
 
-    // =========================
     // 🧾 Orders (User)
-    // =========================
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
         Route::get('/create/{event}', [OrderController::class, 'create'])->name('create');
         Route::post('/', [OrderController::class, 'store'])->name('store');
         Route::get('/{order}', [OrderController::class, 'show'])->name('show');
         Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
-
-        // 📤 Upload bukti pembayaran
         Route::get('/{id}/upload', [OrderController::class, 'uploadForm'])->name('upload');
         Route::post('/{id}/upload', [OrderController::class, 'uploadPayment'])->name('upload.store');
     });
@@ -94,11 +91,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
     Route::post('/tickets', [TicketController::class, 'store'])->name('tickets.store');
     Route::get('/tickets/purchase/{id}', [TicketController::class, 'purchase'])->name('tickets.purchase');
-
-    //news
-    Route::middleware(['auth'])->group(function () {
-    Route::get('/news', [NewsController::class, 'index'])->name('news');
-    Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
 });
 
 // =========================
@@ -124,13 +116,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     // 💬 Support / Help
     Route::get('support', [SupportController::class, 'index'])->name('support.index');
 
-     // Halaman check-in admin
-    Route::get('tickets/check-in', [TicketCheckInController::class, 'index'])
-        ->name('tickets.check-in');
+    // Halaman check-in admin
+    Route::get('tickets/check-in', [TicketCheckInController::class, 'index'])->name('tickets.check-in');
+    Route::post('tickets/check-in', [TicketCheckInController::class, 'verify'])->name('tickets.verify');
 
-    // Proses verifikasi tiket
-    Route::post('tickets/check-in', [TicketCheckInController::class, 'verify'])
-        ->name('tickets.verify');
     // 🎉 Events
     Route::resource('events', AdminEventController::class);
 
@@ -144,21 +133,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
         Route::delete('/{event}/{ticket}/delete', [TicketTypeController::class, 'destroy'])->name('destroy');
     });
 
-    // =========================
     // 🧾 Orders (Admin)
-    // =========================
     Route::resource('orders', AdminOrderController::class);
-
-    // 🔹 Verifikasi manual pembayaran (Manual Payment Verification)
-    Route::post('orders/{id}/verify-payment', [AdminOrderController::class, 'verifyPayment'])
-        ->name('orders.verify-payment');
+    Route::post('orders/{id}/verify-payment', [AdminOrderController::class, 'verifyPayment'])->name('orders.verify-payment');
 
     // 👥 Customers
     Route::resource('customers', CustomerController::class)->only(['index', 'show']);
 
     // 🎁 Promotions
     Route::resource('promotions', PromotionController::class);
-    Route::put('promotions/{id}', [PromotionController::class, 'update'])->name('promotions.update');
 
     // 🏟 Venues
     Route::resource('venues', VenueController::class);
@@ -166,6 +149,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     // 📊 Reports
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/pdf', [ReportController::class, 'exportPdf'])->name('reports.pdf');
+
+    // 🏦 Payment Methods (Admin)
+    Route::prefix('payment-methods')->name('payment_methods.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'update'])->name('update');
+        Route::delete('/{id}', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'destroy'])->name('destroy');
+    });
 
     // 🔔 Notifications
     Route::get('notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');

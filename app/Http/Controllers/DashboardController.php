@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Promotion;
 use App\Models\TicketType;
 use App\Models\Order;
+use App\Models\PaymentMethod; // ✅ Pastikan model ini ada
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -14,7 +15,7 @@ use Carbon\Carbon;
 class DashboardController extends Controller
 {
     /**
-     * 🏠 Tampilkan halaman dashboard berisi event dan tiket.
+     * 🏠 Tampilkan halaman dashboard berisi event, tiket, dan metode pembayaran.
      */
     public function index()
     {
@@ -74,7 +75,13 @@ class DashboardController extends Controller
             ];
         });
 
-        return view('pages.dashboard', ['festivalData' => $festivalData]);
+        // Ambil semua metode pembayaran
+        $paymentMethods = PaymentMethod::all();
+
+        return view('pages.dashboard', [
+            'festivalData' => $festivalData,
+            'paymentMethods' => $paymentMethods, // ✅ Tambahkan ini
+        ]);
     }
 
     /**

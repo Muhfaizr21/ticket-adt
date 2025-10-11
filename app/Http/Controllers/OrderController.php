@@ -15,9 +15,7 @@ use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
-    /**
-     * 🧾 List semua order milik user
-     */
+    // 🧾 List semua order user
     public function index()
     {
         $orders = Order::with(['event', 'ticketType', 'payment'])
@@ -28,22 +26,18 @@ class OrderController extends Controller
         return view('orders.index', compact('orders'));
     }
 
-    /**
-     * 🛒 Form buat order baru
-     */
+    // 🛒 Form buat order baru
     public function create($event_id)
     {
         $event = Event::with('ticketTypes')->findOrFail($event_id);
 
-        // Ambil semua metode pembayaran dari database
+        // Ambil semua metode pembayaran dari DB
         $paymentMethods = PaymentMethod::all();
 
         return view('orders.create', compact('event', 'paymentMethods'));
     }
 
-    /**
-     * 💾 Simpan order baru + payment info (status pending)
-     */
+    // 💾 Simpan order baru + payment info
     public function store(Request $request)
     {
         $request->validate([
@@ -78,10 +72,8 @@ class OrderController extends Controller
 
         $finalPrice = max($finalPrice, 0);
 
-        // 🔹 Generate barcode unik
         $barcode = (string) Str::uuid();
 
-        // 🔹 Simpan order
         $order = Order::create([
             'user_id' => Auth::id(),
             'event_id' => $request->event_id,
@@ -93,34 +85,28 @@ class OrderController extends Controller
             'refund_status' => 'none',
         ]);
 
-        // 🔹 Simpan payment info awal (tanpa bukti)
         OrderPayment::create([
             'order_id' => $order->id,
             'bank_name' => $request->payment_method,
-            'account_name' => null, // nanti diisi saat upload bukti
+            'account_name' => null,
             'proof_image' => null,
             'status' => 'pending',
         ]);
 
-        // 🔹 Kurangi tiket tersedia
         $ticket->decrement('available_tickets', $request->quantity);
 
         return redirect()->route('orders.upload', $order->id)
             ->with('success', 'Order berhasil dibuat! Silakan upload bukti pembayaran.');
     }
 
-    /**
-     * 📤 Form upload bukti pembayaran
-     */
+    // 📤 Form upload bukti pembayaran
     public function uploadForm($id)
     {
         $order = Order::with('payment')->where('user_id', Auth::id())->findOrFail($id);
         return view('orders.upload', compact('order'));
     }
 
-    /**
-     * 💳 Upload bukti pembayaran
-     */
+    // 💳 Upload bukti pembayaran
     public function uploadPayment(Request $request, $id)
     {
         $order = Order::with('payment')->where('user_id', Auth::id())->findOrFail($id);
@@ -130,7 +116,6 @@ class OrderController extends Controller
             'proof_image' => 'required|image|max:2048',
         ]);
 
-        // Hapus bukti lama jika ada
         if ($order->payment->proof_image) {
             Storage::disk('public')->delete($order->payment->proof_image);
         }
@@ -147,9 +132,7 @@ class OrderController extends Controller
             ->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi admin.');
     }
 
-    /**
-     * 🔍 Detail order user
-     */
+    // 🔍 Detail order user
     public function show($id)
     {
         $order = Order::with(['event', 'ticketType', 'payment'])->findOrFail($id);

@@ -1,3 +1,7 @@
+@php
+use Illuminate\Support\Str;
+@endphp
+
 @extends('admin.layouts.app')
 
 @section('title', 'Manajemen Venue')
