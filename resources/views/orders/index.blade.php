@@ -3,9 +3,7 @@
 
 @section('content')
     <div class="container py-5">
-        <h2 class="fw-bold mb-4">
-            🧾 Daftar Pesanan Saya
-        </h2>
+        <h2 class="fw-bold mb-4">🧾 Daftar Pesanan Saya</h2>
 
         {{-- ✅ Notifikasi --}}
         @if (session('success'))
@@ -26,12 +24,8 @@
         @if ($orders->isEmpty())
             <div class="text-center py-5">
                 <img src="{{ asset('images/empty-cart.svg') }}" alt="No Orders" style="width: 150px;" class="mb-3">
-                <h5 class="fw-semibold text-secondary mb-2">
-                    Belum ada pesanan yang dibuat.
-                </h5>
-                <p class="text-muted mb-4">
-                    Yuk, lihat event menarik dan beli tiket sekarang!
-                </p>
+                <h5 class="fw-semibold text-secondary mb-2">Belum ada pesanan yang dibuat.</h5>
+                <p class="text-muted mb-4">Yuk, lihat event menarik dan beli tiket sekarang!</p>
                 <a href="{{ route('shop.index') }}" class="btn btn-primary btn-lg">
                     <i class="bi bi-cart-plus"></i> Order Sekarang
                 </a>
@@ -57,9 +51,7 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>
-                                    <div class="fw-semibold text-primary">
-                                        {{ $order->event->name ?? '-' }}
-                                    </div>
+                                    <div class="fw-semibold text-primary">{{ $order->event->name ?? '-' }}</div>
                                     <small class="text-muted">
                                         {{ $order->event->date ? \Carbon\Carbon::parse($order->event->date)->format('d M Y') : '' }}
                                     </small>
@@ -75,9 +67,7 @@
                                             default => 'warning'
                                         };
                                     @endphp
-                                    <span class="badge bg-{{ $badge }}">
-                                        {{ ucfirst($order->status) }}
-                                    </span>
+                                    <span class="badge bg-{{ $badge }}">{{ ucfirst($order->status) }}</span>
                                 </td>
                                 <td>
                                     @php
@@ -88,14 +78,20 @@
                                             default => 'secondary'
                                         };
                                     @endphp
-                                    <span class="badge bg-{{ $refundBadge }}">
-                                        {{ ucfirst($order->refund_status) }}
-                                    </span>
+                                    <span class="badge bg-{{ $refundBadge }}">{{ ucfirst($order->refund_status) }}</span>
                                 </td>
                                 <td class="text-center">
                                     <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-info me-1">
                                         <i class="bi bi-eye"></i> Detail
                                     </a>
+
+                                    {{-- Tombol Ajukan Refund --}}
+                                    @if ($order->status === 'paid' && ($order->refund_status === 'none' || is_null($order->refund_status)))
+                                        <a href="{{ route('refunds.create', $order->id) }}" class="btn btn-sm btn-warning me-1">
+    <i class="bi bi-arrow-counterclockwise"></i> Ajukan Refund
+</a>
+
+                                    @endif
 
                                     {{-- Jika order masih pending, tampilkan tombol hapus --}}
                                     @if ($order->status === 'pending')

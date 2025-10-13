@@ -178,4 +178,48 @@ class OrderController extends Controller
 
         return response()->json(['status' => 'success', 'message' => 'Tiket berhasil check-in!', 'order_id' => $order->id]);
     }
+
+    // ==================== REFUND TICKET ====================
+
+    // 📄 Form pengajuan refund tiket
+    public function createRefund()
+    {
+        $orders = Order::with('event')
+            ->where('user_id', Auth::id())
+            ->where('status', 'paid')
+            ->whereIn('refund_status', ['none', null])
+            ->get();
+
+        return view('orders.refund_request', compact('orders'));
+    }
+
+    // 💾 Simpan pengajuan refund tiket
+    public function storeRefund(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:orders,id',
+            'reason' => 'required|string|min:5',
+            'proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+        ]);
+
+        $order = Order::where('id', $request->order_id)
+            ->where('user_id', Auth::id())
+            ->where('status', 'paid')
+            ->whereIn('refund_status', ['none', null])
+            ->firstOrFail();
+
+        // Simpan bukti jika ada
+        $proofPath = null;
+        if ($request->hasFile('proof')) {
+            $proofPath = $request->file('proof')->store('refund_proofs', 'public');
+        }
+
+        $order->update([
+            'refund_status' => 'requested',
+            'refund_reason' => $request->reason,
+            'refund_proof' => $proofPath,
+        ]);
+
+        return redirect()->route('orders.index')->with('success', 'Pengajuan refund berhasil dikirim!');
+    }
 }

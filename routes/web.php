@@ -14,6 +14,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\RefundController; // User RefundController
 
 // =========================
 // 🧑‍💼 ADMIN CONTROLLERS
@@ -62,15 +63,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
     // 📢 Info & Bantuan
     Route::get('/help', [HelpController::class, 'index'])->name('help');
     Route::get('/news', [NewsController::class, 'index'])->name('news');
     Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
 
-    // Contact routes
-    Route::get('/contact', [ContactController::class, 'index'])->name('contact'); // tampilkan form
-    Route::post('/contact', [ContactController::class, 'store'])->name('contact.store'); // kirim data
-
+    // Contact
+    Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+    Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
     // 🛍 Shop
     Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
@@ -88,7 +89,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}/barcode/download', [OrderController::class, 'downloadBarcode'])->name('downloadBarcode');
     });
 
-    // 🎟 Ticket Verification (QR Scan)
+    // 💸 Refunds (User)
+    Route::prefix('refunds')->name('refunds.')->group(function () {
+        Route::get('/create/{order}', [RefundController::class, 'create'])->name('create');
+        Route::post('/store', [RefundController::class, 'store'])->name('store');
+    });
+
+    // 🎟 Ticket Verification
     Route::post('/tickets/verify', [OrderController::class, 'verifyTicket'])->name('tickets.verify');
 
     // 🎫 Tickets
@@ -141,8 +148,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::resource('orders', AdminOrderController::class);
     Route::post('orders/{id}/verify-payment', [AdminOrderController::class, 'verifyPayment'])->name('orders.verify-payment');
 
-    // 👥 Customers
-    Route::resource('customers', CustomerController::class)->only(['index', 'show']);
+    // 👥 Customers / Refunds Admin
+    Route::prefix('customers')->name('customers.')->group(function () {
+        Route::get('refunds', [CustomerController::class, 'index'])->name('refunds.index');
+        Route::put('refunds/{order}/{status}', [CustomerController::class, 'updateRefundStatus'])->name('refunds.update');
+        Route::get('/', [CustomerController::class, 'index'])->name('index');
+        Route::get('/{customer}', [CustomerController::class, 'show'])->name('show');
+    });
 
     // 🎁 Promotions
     Route::resource('promotions', PromotionController::class);
