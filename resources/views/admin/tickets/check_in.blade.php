@@ -47,6 +47,7 @@
                             <thead>
                                 <tr>
                                     <th>Nama User</th>
+                                    <th>Tipe Tiket</th>
                                     <th>Barcode</th>
                                     <th>Status Check-In</th>
                                 </tr>
@@ -55,6 +56,7 @@
                                 @foreach($orders as $order)
                                     <tr id="order-{{ $order->id }}">
                                         <td>{{ $order->user->name }}</td>
+                                        <td>{{ $order->ticketType->name ?? '-' }}</td>
                                         <td>{{ $order->barcode_code }}</td>
                                         <td>
                                             @if($order->checked_in_at)
@@ -87,7 +89,7 @@
                 const alertDiv = document.createElement('div');
                 alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
                 alertDiv.innerHTML = `${type === 'success' ? '✅' : '❌'} ${message} 
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
                 alertContainer.innerHTML = '';
                 alertContainer.appendChild(alertDiv);
                 if (timeout > 0) setTimeout(() => alertDiv.remove(), timeout);
@@ -97,11 +99,11 @@
                 const now = new Date().toLocaleTimeString();
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                <td>${now}</td>
-                <td>${barcode}</td>
-                <td>${success ? '<span class="badge bg-success">✔ ' + message + '</span>'
+                    <td>${now}</td>
+                    <td>${barcode}</td>
+                    <td>${success ? '<span class="badge bg-success">✔ ' + message + '</span>'
                         : '<span class="badge bg-danger">❌ ' + message + '</span>'}</td>
-            `;
+                `;
                 if (scanLog.children.length === 1 && scanLog.children[0].textContent.includes("Belum")) {
                     scanLog.innerHTML = '';
                 }

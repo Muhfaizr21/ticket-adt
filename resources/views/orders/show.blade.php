@@ -21,18 +21,37 @@
                 <hr>
                 <p><strong>Kode Order:</strong> {{ $order->barcode_code }}</p>
 
-                {{-- Barcode --}}
-                <div class="my-3">
+                {{-- Barcode dan QR Code --}}
+                <div class="my-4 text-center">
                     @php
                         use Milon\Barcode\DNS1D;
+                        use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
+                        // Barcode (1D)
                         $barcode = new DNS1D();
                         $barcode->setStorPath(public_path('barcodes/'));
                         $barcodeImage = $barcode->getBarcodePNG($order->barcode_code, 'C39+', 2, 80, [0, 0, 0], true);
                     @endphp
-                    <img src="data:image/png;base64,{{ $barcodeImage }}" alt="Barcode"
-                        class="img-fluid border rounded shadow-sm" style="max-width: 300px;">
+
+                    {{-- Barcode --}}
+                    <div class="mb-4">
+                        <h6 class="fw-semibold text-dark">🔢 Barcode</h6>
+                        <img src="data:image/png;base64,{{ $barcodeImage }}" alt="Barcode"
+                            class="img-fluid border rounded shadow-sm" style="max-width: 300px;">
+                    </div>
+
+                    {{-- QR Code --}}
+                    <div>
+                        <h6 class="fw-semibold text-dark">🔲 QR Code</h6>
+                        {!! QrCode::size(200)->margin(1)->generate($order->barcode_code) !!}
+                    </div>
+
+                    <p class="mt-3 text-muted">
+                        📸 <strong>Screenshot atau simpan kode ini untuk proses check-in di lokasi acara.</strong>
+                    </p>
                 </div>
 
+                {{-- Tombol Download Barcode --}}
                 @if ($order->payment && $order->payment->status === 'verified')
                     <a href="{{ route('orders.downloadBarcode', $order->id) }}" class="btn btn-success mb-3">
                         <i class="bi bi-download"></i> Download Barcode
@@ -47,7 +66,8 @@
                 @if ($order->ticketType->promotions && $order->ticketType->promotions->count() > 0)
                     <p><strong>Promo:</strong>
                         @foreach ($order->ticketType->promotions as $promo)
-                            <span class="badge bg-info">{{ $promo->name }} -
+                            <span class="badge bg-info">
+                                {{ $promo->name }} -
                                 {{ $promo->persen_diskon ? $promo->persen_diskon . '%' : 'Rp' . number_format($promo->value, 0, ',', '.') }}
                             </span>
                         @endforeach

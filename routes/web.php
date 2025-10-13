@@ -62,12 +62,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
-
     // 📢 Info & Bantuan
     Route::get('/help', [HelpController::class, 'index'])->name('help');
     Route::get('/news', [NewsController::class, 'index'])->name('news');
     Route::get('/news/{slug}', [NewsController::class, 'show'])->name('news.show');
-    Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+
+    // Contact routes
+    Route::get('/contact', [ContactController::class, 'index'])->name('contact'); // tampilkan form
+    Route::post('/contact', [ContactController::class, 'store'])->name('contact.store'); // kirim data
+
 
     // 🛍 Shop
     Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
