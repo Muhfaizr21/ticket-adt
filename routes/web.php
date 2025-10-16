@@ -14,7 +14,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\RefundController; // User RefundController
+use App\Http\Controllers\RefundController;
 
 // =========================
 // 🧑‍💼 ADMIN CONTROLLERS
@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\AdminNewsController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\TicketCheckInController;
+use App\Http\Controllers\Admin\PaymentMethodController;
 
 // =========================
 // 🌟 PUBLIC ROUTES
@@ -55,6 +56,8 @@ Route::middleware(['auth'])->group(function () {
 
     // 🏠 Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('pengguna.dashboard');
+    Route::get('/events/search', [DashboardController::class, 'search'])->name('events.search');
+    Route::get('/events/{id}', [DashboardController::class, 'show'])->name('events.show');
 
     // 🎫 Beli tiket
     Route::get('/tickets/buy/{event_id}/{ticket_type_id}', [DashboardController::class, 'buyTicket'])->name('tickets.buy');
@@ -63,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
 
     // 📢 Info & Bantuan
     Route::get('/help', [HelpController::class, 'index'])->name('help');
@@ -113,16 +117,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // 👤 Profile Admin
-    Route::get('profile', [AdminProfileController::class, 'index'])->name('profile.index');
-    Route::put('profile', [AdminProfileController::class, 'update'])->name('profile.update');
-    Route::put('profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password.update');
-    Route::put('profile/avatar', [AdminProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [AdminProfileController::class, 'index'])->name('index');
+        Route::put('/', [AdminProfileController::class, 'update'])->name('update');
+        Route::put('/password', [AdminProfileController::class, 'updatePassword'])->name('password.update');
+        Route::put('/avatar', [AdminProfileController::class, 'updateAvatar'])->name('avatar.update');
+        Route::delete('/avatar', [AdminProfileController::class, 'destroyAvatar'])->name('avatar.destroy');
+    });
 
     // ⚙️ Settings
-    Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
-    Route::get('settings/edit', [SettingsController::class, 'edit'])->name('settings.edit');
-    Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
-    Route::put('settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme.update');
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::get('/edit', [SettingsController::class, 'edit'])->name('edit');
+        Route::put('/', [SettingsController::class, 'update'])->name('update');
+        Route::put('/theme', [SettingsController::class, 'updateTheme'])->name('theme.update');
+    });
 
     // 💬 Support
     Route::get('support', [SupportController::class, 'index'])->name('support.index');
@@ -150,10 +159,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
 
     // 👥 Customers / Refunds Admin
     Route::prefix('customers')->name('customers.')->group(function () {
-        Route::get('refunds', [CustomerController::class, 'index'])->name('refunds.index');
-        Route::put('refunds/{order}/{status}', [CustomerController::class, 'updateRefundStatus'])->name('refunds.update');
         Route::get('/', [CustomerController::class, 'index'])->name('index');
         Route::get('/{customer}', [CustomerController::class, 'show'])->name('show');
+        Route::get('refunds', [CustomerController::class, 'index'])->name('refunds.index');
+        Route::put('refunds/{order}/{status}', [CustomerController::class, 'updateRefundStatus'])->name('refunds.update');
     });
 
     // 🎁 Promotions
@@ -168,12 +177,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
 
     // 🏦 Payment Methods
     Route::prefix('payment-methods')->name('payment_methods.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'update'])->name('update');
-        Route::delete('/{id}', [\App\Http\Controllers\Admin\PaymentMethodController::class, 'destroy'])->name('destroy');
+        Route::get('/', [PaymentMethodController::class, 'index'])->name('index');
+        Route::get('/create', [PaymentMethodController::class, 'create'])->name('create');
+        Route::post('/', [PaymentMethodController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [PaymentMethodController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [PaymentMethodController::class, 'update'])->name('update');
+        Route::delete('/{id}', [PaymentMethodController::class, 'destroy'])->name('destroy');
     });
 
     // 🔔 Notifications

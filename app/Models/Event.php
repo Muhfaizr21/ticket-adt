@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class Event extends Model
@@ -17,15 +18,14 @@ class Event extends Model
         'start_time',
         'end_time',
         'location',
-        'available_tickets',
         'poster',
         'venue_id',
     ];
 
     protected $casts = [
-        'date' => 'datetime',
+        'date'       => 'datetime',
         'start_time' => 'datetime:H:i',
-        'end_time' => 'datetime:H:i',
+        'end_time'   => 'datetime:H:i',
     ];
 
     /**
@@ -67,9 +67,28 @@ class Event extends Model
     {
         if ($this->start_time && $this->end_time) {
             $start = Carbon::parse($this->start_time);
-            $end = Carbon::parse($this->end_time);
+            $end   = Carbon::parse($this->end_time);
             return $start->diff($end)->format('%h jam %i menit');
         }
         return null;
+    }
+
+    /**
+     * 🔥 Boot method untuk event model
+     * Otomatis hapus poster & tiket terkait saat event dihapus
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($event) {
+            // Hapus poster jika ada
+            if ($event->poster && Storage::disk('public')->exists($event->poster)) {
+                Storage::disk('public')->delete($event->poster);
+            }
+
+            // Hapus semua tiket terkait
+            $event->ticketTypes()->delete();
+        });
     }
 }

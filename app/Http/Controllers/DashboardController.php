@@ -7,7 +7,7 @@ use App\Models\Event;
 use App\Models\Promotion;
 use App\Models\TicketType;
 use App\Models\Order;
-use App\Models\PaymentMethod; // ✅ Pastikan model ini ada
+use App\Models\PaymentMethod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -19,7 +19,6 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // Ambil semua event beserta tipe tiket
         $events = Event::with(['ticketTypes'])->orderBy('date', 'asc')->get();
 
         $festivalData = $events->map(function ($event) {
@@ -27,7 +26,6 @@ class DashboardController extends Controller
                 $basePrice = $ticket->price ?? 0;
                 $finalPrice = $basePrice;
 
-                // 🔍 Cari promo aktif untuk tiket atau event
                 $promotion = Promotion::where(function ($q) use ($ticket) {
                     $q->where('ticket_type_id', $ticket->id)
                         ->orWhere('event_id', $ticket->event_id);
@@ -37,7 +35,6 @@ class DashboardController extends Controller
                     ->whereDate('end_date', '>=', now())
                     ->first();
 
-                // 💰 Hitung harga promo
                 if ($promotion) {
                     if (!empty($promotion->persen_diskon)) {
                         $discount = $basePrice * ($promotion->persen_diskon / 100);
@@ -75,17 +72,25 @@ class DashboardController extends Controller
             ];
         });
 
-        // Ambil semua metode pembayaran
         $paymentMethods = PaymentMethod::all();
 
         return view('pages.dashboard', [
             'festivalData' => $festivalData,
-            'paymentMethods' => $paymentMethods, // ✅ Tambahkan ini
+            'paymentMethods' => $paymentMethods,
         ]);
     }
 
     /**
-     * 🎟 Menampilkan form pembelian tiket
+     * 🎟 Tampilkan detail event
+     */
+    public function show($id)
+    {
+        $event = Event::with('ticketTypes')->findOrFail($id);
+        return view('pengguna.event-detail', compact('event'));
+    }
+
+    /**
+     * 🎫 Menampilkan form pembelian tiket
      */
     public function buyTicket($event_id, $ticket_type_id)
     {
@@ -120,5 +125,39 @@ class DashboardController extends Controller
 
         return redirect()->route('orders.show', $order->id)
             ->with('success', 'Tiket berhasil dipesan!');
+    }
+
+    /**
+     * 🔍 Fitur pencarian event (nama, tanggal, lokasi)
+     */
+    public function search(Request $request)
+    {
+        $query = Event::query();
+
+        $search = $request->input('q');
+        $filter = $request->input('filter');
+
+        if ($search) {
+            switch ($filter) {
+                case 'location':
+                    $query->where('location', 'like', "%{$search}%");
+                    break;
+                case 'date':
+                    $query->whereDate('date', $search);
+                    break;
+                case 'name':
+                    $query->where('name', 'like', "%{$search}%");
+                    break;
+                default:
+                    $query->where(function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('location', 'like', "%{$search}%");
+                    });
+            }
+        }
+
+        $events = $query->orderBy('date', 'asc')->get();
+
+        return view('pengguna.event-search', compact('events', 'search', 'filter'));
     }
 }

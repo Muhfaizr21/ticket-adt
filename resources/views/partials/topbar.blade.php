@@ -42,6 +42,23 @@
                 </ul>
             </nav>
 
+            <!-- Tambahkan di dalam .topbar-actions sebelum basket -->
+            <div class="search-box">
+                <form action="{{ route('events.search') }}" method="GET" class="search-form">
+                    <input type="text" name="q" placeholder="Search events..." value="{{ request('q') }}">
+                    <select name="filter" class="search-filter">
+                        <option value="">All</option>
+                        <option value="location" {{ request('filter') == 'location' ? 'selected' : '' }}>Location
+                        </option>
+                        <option value="date" {{ request('filter') == 'date' ? 'selected' : '' }}>Date</option>
+                        <option value="name" {{ request('filter') == 'name' ? 'selected' : '' }}>Name</option>
+                    </select>
+                    <button type="submit" class="search-btn">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+
             <!-- Right Side Actions -->
             <div class="topbar-actions">
                 <!-- 🛒 My Basket -->

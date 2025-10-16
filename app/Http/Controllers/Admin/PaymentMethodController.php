@@ -26,11 +26,11 @@ class PaymentMethodController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:bank,qris',
-            'name' => 'required|string|max:100',
+            'type'           => 'required|in:bank,qris',
+            'name'           => 'required|string|max:100',
             'account_number' => 'required_if:type,bank|string|max:50|nullable',
-            'account_name' => 'required_if:type,bank|string|max:100|nullable',
-            'qr_code_image' => 'required_if:type,qris|image|mimes:jpg,jpeg,png|max:2048|nullable',
+            'account_name'   => 'required_if:type,bank|string|max:100|nullable',
+            'qr_code_image'  => 'required_if:type,qris|image|mimes:jpg,jpeg,png|max:2048|nullable',
         ]);
 
         $data = $request->only(['type', 'name', 'account_number', 'account_name']);
@@ -43,22 +43,7 @@ class PaymentMethodController extends Controller
         PaymentMethod::create($data);
 
         return redirect()->route('admin.payment_methods.index')
-            ->with('success', 'Metode pembayaran berhasil ditambahkan!');
-    }
-
-    // 📝 Hapus metode pembayaran
-    public function destroy($id)
-    {
-        $method = PaymentMethod::findOrFail($id);
-
-        // Hapus QR code dari storage jika ada
-        if ($method->qr_code_image) {
-            Storage::disk('public')->delete($method->qr_code_image);
-        }
-
-        $method->delete();
-
-        return back()->with('success', 'Metode pembayaran berhasil dihapus!');
+            ->with('success', '✅ Metode pembayaran berhasil ditambahkan!');
     }
 
     // 📝 Form edit metode pembayaran
@@ -74,11 +59,11 @@ class PaymentMethodController extends Controller
         $method = PaymentMethod::findOrFail($id);
 
         $request->validate([
-            'type' => 'required|in:bank,qris',
-            'name' => 'required|string|max:100',
+            'type'           => 'required|in:bank,qris',
+            'name'           => 'required|string|max:100',
             'account_number' => 'required_if:type,bank|string|max:50|nullable',
-            'account_name' => 'required_if:type,bank|string|max:100|nullable',
-            'qr_code_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'account_name'   => 'required_if:type,bank|string|max:100|nullable',
+            'qr_code_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $data = $request->only(['type', 'name', 'account_number', 'account_name']);
@@ -86,7 +71,7 @@ class PaymentMethodController extends Controller
         // Ganti QR code jika ada
         if ($request->hasFile('qr_code_image')) {
             // Hapus file lama
-            if ($method->qr_code_image) {
+            if ($method->qr_code_image && Storage::disk('public')->exists($method->qr_code_image)) {
                 Storage::disk('public')->delete($method->qr_code_image);
             }
             $data['qr_code_image'] = $request->file('qr_code_image')->store('qris', 'public');
@@ -95,6 +80,16 @@ class PaymentMethodController extends Controller
         $method->update($data);
 
         return redirect()->route('admin.payment_methods.index')
-            ->with('success', 'Metode pembayaran berhasil diperbarui!');
+            ->with('success', '✅ Metode pembayaran berhasil diperbarui!');
+    }
+
+    // 📝 Hapus metode pembayaran
+    public function destroy($id)
+    {
+        $method = PaymentMethod::findOrFail($id);
+        $method->delete(); // QR code otomatis terhapus lewat model
+
+        return redirect()->route('admin.payment_methods.index')
+            ->with('success', '🗑️ Metode pembayaran berhasil dihapus!');
     }
 }

@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
-    /**
-     * 🟢 Tampilkan semua event
-     */
+    // Tampilkan semua event
     public function index()
     {
         $events = Event::with(['ticketTypes', 'venue'])
@@ -23,18 +21,14 @@ class EventController extends Controller
         return view('admin.events.index', compact('events'));
     }
 
-    /**
-     * 🟢 Form tambah event
-     */
+    // Form tambah event
     public function create()
     {
         $venues = Venue::all();
         return view('admin.events.create', compact('venues'));
     }
 
-    /**
-     * 🟢 Simpan event baru
-     */
+    // Simpan event baru
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -48,15 +42,13 @@ class EventController extends Controller
             'poster'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Upload poster jika ada
         if ($request->hasFile('poster')) {
             $validated['poster'] = $request->file('poster')->store('posters/events', 'public');
         }
 
-        // Simpan event
         $event = Event::create($validated);
 
-        // Tambahkan tipe tiket default (tanpa available_tickets, nanti bisa ditambah manual di menu tiket)
+        // Tipe tiket default
         $defaultTickets = [
             [
                 'event_id'    => $event->id,
@@ -78,9 +70,7 @@ class EventController extends Controller
             ->with('success', '✅ Event baru berhasil ditambahkan!');
     }
 
-    /**
-     * 🟢 Form edit event
-     */
+    // Form edit event
     public function edit($id)
     {
         $event = Event::with(['ticketTypes', 'venue'])->findOrFail($id);
@@ -89,9 +79,7 @@ class EventController extends Controller
         return view('admin.events.edit', compact('event', 'venues'));
     }
 
-    /**
-     * 🟢 Update event
-     */
+    // Update event
     public function update(Request $request, $id)
     {
         $event = Event::findOrFail($id);
@@ -107,8 +95,8 @@ class EventController extends Controller
             'poster'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Hapus poster lama jika ada dan diganti baru
         if ($request->hasFile('poster')) {
+            // Hapus poster lama otomatis lewat model tidak perlu lagi, tapi bisa double safety
             if ($event->poster && Storage::disk('public')->exists($event->poster)) {
                 Storage::disk('public')->delete($event->poster);
             }
@@ -122,18 +110,11 @@ class EventController extends Controller
             ->with('success', '✅ Data event berhasil diperbarui!');
     }
 
-    /**
-     * 🟢 Hapus event
-     */
+    // Hapus event
     public function destroy($id)
     {
         $event = Event::findOrFail($id);
-
-        if ($event->poster && Storage::disk('public')->exists($event->poster)) {
-            Storage::disk('public')->delete($event->poster);
-        }
-
-        $event->delete();
+        $event->delete(); // Poster & ticket types otomatis terhapus
 
         return redirect()->route('admin.events.index')
             ->with('success', '🗑️ Event berhasil dihapus.');

@@ -9,32 +9,36 @@ use Illuminate\Support\Facades\Storage;
 
 class AdminProfileController extends Controller
 {
-    // Tampilkan profile admin
+    // 📝 Tampilkan profile admin
     public function index()
     {
         $admin = auth()->user();
         return view('admin.profile.index', compact('admin'));
     }
 
-    // Update profile (nama, email, position, phone, avatar)
+    // 📝 Update profile (nama, email, position, phone, avatar)
     public function update(Request $request)
     {
         $admin = auth()->user();
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $admin->id,
-            'phone' => 'nullable|string|max:20',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255|unique:users,email,' . $admin->id,
+            'phone'    => 'nullable|string|max:20',
             'position' => 'nullable|string|max:255',
-            'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'avatar'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $admin->name = $validated['name'];
-        $admin->email = $validated['email'];
-        $admin->phone = $validated['phone'] ?? null;
-        $admin->position = $validated['position'] ?? null;
+        $admin->fill([
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'phone'    => $validated['phone'] ?? null,
+            'position' => $validated['position'] ?? null,
+        ]);
 
+        // Update avatar jika ada
         if ($request->hasFile('avatar')) {
+            // Hapus avatar lama
             if ($admin->avatar && Storage::disk('public')->exists($admin->avatar)) {
                 Storage::disk('public')->delete($admin->avatar);
             }
@@ -44,17 +48,17 @@ class AdminProfileController extends Controller
         $admin->save();
 
         return redirect()->route('admin.profile.index')
-            ->with('success', 'Profile berhasil diperbarui!');
+            ->with('success', '✅ Profile berhasil diperbarui!');
     }
 
-    // Update password
+    // 📝 Update password
     public function updatePassword(Request $request)
     {
         $admin = auth()->user();
 
         $validated = $request->validate([
             'current_password' => 'required',
-            'password' => 'required|string|min:8|confirmed',
+            'password'         => 'required|string|min:8|confirmed',
         ]);
 
         if (!Hash::check($validated['current_password'], $admin->password)) {
@@ -65,10 +69,10 @@ class AdminProfileController extends Controller
         $admin->save();
 
         return redirect()->route('admin.profile.index')
-            ->with('success', 'Password berhasil diperbarui!');
+            ->with('success', '✅ Password berhasil diperbarui!');
     }
 
-    // Update avatar terpisah via form khusus (opsional)
+    // 📝 Update avatar terpisah (opsional)
     public function updateAvatar(Request $request)
     {
         $admin = auth()->user();
@@ -77,6 +81,7 @@ class AdminProfileController extends Controller
             'avatar' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
+        // Hapus avatar lama
         if ($admin->avatar && Storage::disk('public')->exists($admin->avatar)) {
             Storage::disk('public')->delete($admin->avatar);
         }
@@ -85,6 +90,23 @@ class AdminProfileController extends Controller
         $admin->save();
 
         return redirect()->route('admin.profile.index')
-            ->with('success', 'Avatar berhasil diperbarui!');
+            ->with('success', '✅ Avatar berhasil diperbarui!');
+    }
+
+    // Hapus avatar admin
+    // Hapus avatar admin
+    public function destroyAvatar()
+    {
+        $admin = auth()->user();
+
+        if ($admin->avatar && Storage::disk('public')->exists($admin->avatar)) {
+            Storage::disk('public')->delete($admin->avatar);
+        }
+
+        $admin->avatar = null;
+        $admin->save();
+
+        return redirect()->route('admin.profile.index')
+            ->with('success', '✅ Foto profil berhasil dihapus!');
     }
 }

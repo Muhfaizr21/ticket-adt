@@ -62,6 +62,42 @@
     animation: loading 1.5s infinite;
 }
 
+.search-box {
+    position: relative;
+    margin-right: 15px;
+}
+.search-form {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 25px;
+    overflow: hidden;
+    border: 1px solid #ddd;
+}
+.search-form input {
+    border: none;
+    padding: 6px 12px;
+    outline: none;
+    background: transparent;
+    width: 150px;
+}
+.search-form .search-filter {
+    border: none;
+    background: transparent;
+    padding: 6px;
+    outline: none;
+}
+.search-form .search-btn {
+    background: var(--primary-color, #03346E);
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    cursor: pointer;
+}
+.search-form .search-btn:hover {
+    background: #021f47;
+}
+
 @keyframes loading {
     0% {
         background-position: 200% 0;
