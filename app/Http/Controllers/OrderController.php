@@ -8,6 +8,7 @@ use App\Models\TicketType;
 use App\Models\Promotion;
 use App\Models\OrderPayment;
 use App\Models\PaymentMethod;
+use App\Models\Notification; // ✅ Tambahan
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +18,6 @@ use Illuminate\Support\Facades\Response;
 
 class OrderController extends Controller
 {
-    // 🧾 List semua order user
     public function index()
     {
         $orders = Order::with(['event', 'ticketType', 'payment'])
@@ -28,7 +28,6 @@ class OrderController extends Controller
         return view('orders.index', compact('orders'));
     }
 
-    // 🛒 Form buat order baru
     public function create($event_id)
     {
         $event = Event::with('ticketTypes')->findOrFail($event_id);
@@ -37,7 +36,6 @@ class OrderController extends Controller
         return view('orders.create', compact('event', 'paymentMethods'));
     }
 
-    // 💾 Simpan order baru + payment info
     public function store(Request $request)
     {
         $request->validate([
@@ -91,18 +89,24 @@ class OrderController extends Controller
 
         $ticket->decrement('available_tickets', $request->quantity);
 
+        // ✅ Buat notifikasi admin
+        Notification::create([
+            'title' => 'Pesanan Baru',
+            'message' => 'User ' . Auth::user()->name . ' telah membuat pesanan baru untuk event ' . $order->event->name . '.',
+            'type' => 'order',
+            'is_read' => false,
+        ]);
+
         return redirect()->route('orders.upload', $order->id)
             ->with('success', 'Order berhasil dibuat! Silakan upload bukti pembayaran.');
     }
 
-    // 📤 Form upload bukti pembayaran
     public function uploadForm($id)
     {
         $order = Order::with('payment')->where('user_id', Auth::id())->findOrFail($id);
         return view('orders.upload', compact('order'));
     }
 
-    // 💳 Upload bukti pembayaran
     public function uploadPayment(Request $request, $id)
     {
         $order = Order::with('payment')->where('user_id', Auth::id())->findOrFail($id);
@@ -124,21 +128,25 @@ class OrderController extends Controller
             'status' => 'pending',
         ]);
 
+        // ✅ Notifikasi admin upload bukti pembayaran
+        Notification::create([
+            'title' => 'Menunggu Verifikasi Pembayaran',
+            'message' => 'User ' . Auth::user()->name . ' telah mengupload bukti pembayaran untuk pesanan #' . $order->id . '.',
+            'type' => 'payment',
+            'is_read' => false,
+        ]);
+
         return redirect()->route('orders.show', $order->id)
             ->with('success', 'Bukti pembayaran berhasil diunggah! Menunggu verifikasi admin.');
     }
 
-    // 🔍 Detail order user
     public function show($id)
     {
         $order = Order::with(['event', 'ticketType', 'payment'])->findOrFail($id);
-
         if ($order->user_id != Auth::id()) abort(403);
-
         return view('orders.show', compact('order'));
     }
 
-    // 📥 Download barcode tiket
     public function downloadBarcode($id)
     {
         $order = Order::findOrFail($id);
@@ -159,7 +167,6 @@ class OrderController extends Controller
         ]);
     }
 
-    // ✅ Verifikasi tiket (QR Scan) untuk admin
     public function verifyTicket(Request $request)
     {
         $request->validate([
@@ -167,9 +174,7 @@ class OrderController extends Controller
         ]);
 
         $order = Order::where('barcode_code', $request->barcode_code)->first();
-
         if (!$order) return response()->json(['status' => 'error', 'message' => 'Tiket tidak ditemukan!']);
-
         if ($order->checked_in_at) {
             return response()->json(['status' => 'error', 'message' => 'Tiket sudah digunakan!']);
         }
@@ -177,49 +182,5 @@ class OrderController extends Controller
         $order->update(['checked_in_at' => now()]);
 
         return response()->json(['status' => 'success', 'message' => 'Tiket berhasil check-in!', 'order_id' => $order->id]);
-    }
-
-    // ==================== REFUND TICKET ====================
-
-    // 📄 Form pengajuan refund tiket
-    public function createRefund()
-    {
-        $orders = Order::with('event')
-            ->where('user_id', Auth::id())
-            ->where('status', 'paid')
-            ->whereIn('refund_status', ['none', null])
-            ->get();
-
-        return view('orders.refund_request', compact('orders'));
-    }
-
-    // 💾 Simpan pengajuan refund tiket
-    public function storeRefund(Request $request)
-    {
-        $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'reason' => 'required|string|min:5',
-            'proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
-        ]);
-
-        $order = Order::where('id', $request->order_id)
-            ->where('user_id', Auth::id())
-            ->where('status', 'paid')
-            ->whereIn('refund_status', ['none', null])
-            ->firstOrFail();
-
-        // Simpan bukti jika ada
-        $proofPath = null;
-        if ($request->hasFile('proof')) {
-            $proofPath = $request->file('proof')->store('refund_proofs', 'public');
-        }
-
-        $order->update([
-            'refund_status' => 'requested',
-            'refund_reason' => $request->reason,
-            'refund_proof' => $proofPath,
-        ]);
-
-        return redirect()->route('orders.index')->with('success', 'Pengajuan refund berhasil dikirim!');
     }
 }

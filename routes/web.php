@@ -67,7 +67,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
-
     // 📢 Info & Bantuan
     Route::get('/help', [HelpController::class, 'index'])->name('help');
     Route::get('/news', [NewsController::class, 'index'])->name('news');
@@ -185,8 +184,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
         Route::delete('/{id}', [PaymentMethodController::class, 'destroy'])->name('destroy');
     });
 
-    // 🔔 Notifications
-    Route::get('notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
+    // 🔔 Notifications (Admin)
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
+        Route::post('/{id}/read', [AdminNotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/mark-all', [AdminNotificationController::class, 'markAllAsRead'])->name('markAll');
+    });
 
     // 📰 News
     Route::resource('news', AdminNewsController::class);

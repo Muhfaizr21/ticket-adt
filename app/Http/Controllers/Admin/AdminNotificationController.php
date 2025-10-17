@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -7,26 +8,40 @@ use Illuminate\Http\Request;
 
 class AdminNotificationController extends Controller
 {
-    // 🟢 Tampilkan semua notifikasi
+    /**
+     * 🟢 Menampilkan semua notifikasi
+     */
     public function index()
     {
-        $notifications = Notification::latest()->paginate(10);
+        $notifications = Notification::orderBy('created_at', 'desc')->paginate(10);
         return view('admin.pages.notifications.index', compact('notifications'));
     }
 
-    // 🟢 Tandai notifikasi sebagai dibaca
+    /**
+     * 🟡 Tandai satu notifikasi sebagai dibaca
+     */
     public function markAsRead($id)
     {
-        $notification = Notification::findOrFail($id);
-        $notification->update(['is_read' => true]);
+        $notification = Notification::find($id);
 
-        return redirect()->back()->with('success', '✅ Notifikasi ditandai sebagai dibaca.');
+        if (!$notification) {
+            return redirect()->back()->with('error', '❌ Notifikasi tidak ditemukan.');
+        }
+
+        if (!$notification->is_read) {
+            $notification->update(['is_read' => true]);
+        }
+
+        return redirect()->back()->with('success', '✅ Notifikasi berhasil ditandai sebagai dibaca.');
     }
 
-    // 🟢 Tandai semua sebagai dibaca
+    /**
+     * 🟠 Tandai semua notifikasi sebagai dibaca
+     */
     public function markAllAsRead()
     {
         Notification::where('is_read', false)->update(['is_read' => true]);
-        return redirect()->back()->with('success', '✅ Semua notifikasi ditandai sebagai dibaca.');
+
+        return redirect()->back()->with('success', '✅ Semua notifikasi berhasil ditandai sebagai dibaca.');
     }
 }
