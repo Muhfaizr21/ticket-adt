@@ -2,26 +2,84 @@
 
 @section('title', 'Tambah Event Baru')
 
+@push('styles')
+<style>
+    .form-label {
+        font-weight: 600;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        transition: 0.2s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+        border-color: #0d6efd;
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .card-header {
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+
+    .btn-success {
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .btn-light {
+        border-radius: 8px;
+    }
+
+    #map-container {
+        overflow: hidden;
+        border-radius: 10px;
+    }
+
+    #preview {
+        transition: transform 0.3s ease;
+    }
+
+    #preview:hover {
+        transform: scale(1.03);
+    }
+
+    /* Floating Label Style */
+    .form-floating > label {
+        padding: 0.6rem 0.75rem;
+    }
+</style>
+@endpush
+
 @section('content')
     <div class="container mt-4">
-        <div class="card shadow-sm border-0">
+        <div class="card shadow-lg border-0">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">➕ Tambah Event Baru</h5>
-                <a href="{{ route('admin.events.index') }}" class="btn btn-light btn-sm">← Kembali</a>
+                <h5 class="mb-0 fw-semibold"><i class="bi bi-calendar2-plus me-2"></i>Tambah Event Baru</h5>
+                <a href="{{ route('admin.events.index') }}" class="btn btn-light btn-sm">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Kembali
+                </a>
             </div>
 
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form action="{{ route('admin.events.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                     @csrf
                     <div class="row g-4">
 
                         {{-- Nama Event --}}
                         <div class="col-md-6">
-                            <label for="name" class="form-label fw-semibold">Nama Event <span
-                                    class="text-danger">*</span></label>
+                            <label for="name" class="form-label">Nama Event <span class="text-danger">*</span></label>
                             <input type="text" name="name" id="name"
                                 class="form-control @error('name') is-invalid @enderror"
-                                placeholder="Masukkan nama event..." value="{{ old('name') }}" required>
+                                placeholder="Masukkan nama event..."
+                                value="{{ old('name') }}" required>
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -29,7 +87,7 @@
 
                         {{-- Venue --}}
                         <div class="col-md-6">
-                            <label for="venue_id" class="form-label fw-semibold">Venue (Opsional)</label>
+                            <label for="venue_id" class="form-label">Venue (Opsional)</label>
                             <select name="venue_id" id="venue_id"
                                 class="form-select @error('venue_id') is-invalid @enderror">
                                 <option value="">-- Pilih Venue --</option>
@@ -46,8 +104,8 @@
 
                         {{-- Deskripsi --}}
                         <div class="col-md-12">
-                            <label for="description" class="form-label fw-semibold">Deskripsi Event</label>
-                            <textarea name="description" id="description" rows="3"
+                            <label for="description" class="form-label">Deskripsi Event</label>
+                            <textarea name="description" id="description" rows="4"
                                 class="form-control @error('description') is-invalid @enderror"
                                 placeholder="Tulis deskripsi singkat event...">{{ old('description') }}</textarea>
                             @error('description')
@@ -57,7 +115,7 @@
 
                         {{-- Tanggal dan Waktu --}}
                         <div class="col-md-6">
-                            <label for="date" class="form-label fw-semibold">Tanggal & Waktu Event</label>
+                            <label for="date" class="form-label">Tanggal & Waktu Event</label>
                             <div class="input-group">
                                 <input type="date" name="date" id="date"
                                     class="form-control @error('date') is-invalid @enderror"
@@ -70,7 +128,7 @@
                                     class="form-control @error('end_time') is-invalid @enderror"
                                     value="{{ old('end_time') }}">
                             </div>
-                            <small class="text-muted">Contoh: 9 Oktober 2025 jam 09.00–12.00</small>
+                            <small class="text-muted d-block mt-1">Contoh: 9 Oktober 2025 jam 09.00–12.00</small>
                             @error('date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             @error('start_time') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             @error('end_time') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -78,11 +136,11 @@
 
                         {{-- Lokasi --}}
                         <div class="col-md-6">
-                            <label for="location" class="form-label fw-semibold">Lokasi Event <span
-                                    class="text-danger">*</span></label>
+                            <label for="location" class="form-label">Lokasi Event <span class="text-danger">*</span></label>
                             <input type="text" name="location" id="location"
                                 class="form-control @error('location') is-invalid @enderror"
-                                placeholder="Contoh: Stadion Indramayu" value="{{ old('location') }}" required>
+                                placeholder="Contoh: Stadion Indramayu"
+                                value="{{ old('location') }}" required>
                             @error('location')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -91,35 +149,35 @@
                         {{-- Preview Lokasi --}}
                         <div class="col-md-12 mb-3">
                             <label class="form-label fw-semibold">Preview Lokasi di Peta</label>
-                            <div id="map-container" style="height:250px; border-radius:10px;">
+                            <div id="map-container" style="height: 300px;">
                                 <iframe id="map-frame"
                                     src="https://www.google.com/maps?q={{ urlencode(old('location', 'Indramayu, Gor Wiralodra')) }}&output=embed"
-                                    width="100%" height="250" style="border:0; border-radius:10px;" allowfullscreen=""
-                                    loading="lazy"></iframe>
+                                    width="100%" height="300" style="border:0;" allowfullscreen loading="lazy"></iframe>
                             </div>
                         </div>
 
-
                         {{-- Poster --}}
-                        <div class="col-md-6 mt-4">
-                            <label for="poster" class="form-label fw-semibold">Poster Event</label>
+                        <div class="col-md-6">
+                            <label for="poster" class="form-label">Poster Event</label>
                             <input type="file" name="poster" id="poster"
                                 class="form-control @error('poster') is-invalid @enderror"
                                 accept="image/png,image/jpeg,image/jpg" onchange="previewPoster(event)">
-                            <small class="text-muted d-block">Format: JPG, JPEG, PNG (maks. 2MB)</small>
+                            <small class="text-muted d-block mt-1">Format: JPG, JPEG, PNG (maks. 2MB)</small>
                             @error('poster')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                             <div class="mt-3">
-                                <img id="preview" src="#" alt="Preview Poster" class="img-thumbnail d-none"
-                                    style="max-height: 200px;">
+                                <img id="preview" src="#" alt="Preview Poster"
+                                    class="img-thumbnail d-none shadow-sm" style="max-height: 220px; border-radius: 10px;">
                             </div>
                         </div>
 
                     </div>
 
                     <div class="text-end mt-4">
-                        <button type="submit" class="btn btn-success px-4 fw-semibold">💾 Simpan Event</button>
+                        <button type="submit" class="btn btn-success px-4 py-2">
+                            <i class="bi bi-save me-1"></i> Simpan Event
+                        </button>
                     </div>
                 </form>
             </div>
@@ -130,6 +188,7 @@
     <script>
         const locationInput = document.getElementById('location');
         const mapFrame = document.getElementById('map-frame');
+
         locationInput.addEventListener('input', function () {
             const query = encodeURIComponent(this.value || 'Indramayu, Gor Wiralodra');
             mapFrame.src = `https://www.google.com/maps?q=${query}&output=embed`;

@@ -32,7 +32,7 @@
                         <td>{{ $loop->iteration + ($news->currentPage() - 1) * $news->perPage() }}</td>
                         <td>
                             <strong>{{ $item->title }}</strong><br>
-                            <small class="text-muted">{{ Str::limit($item->slug, 40) }}</small>
+
                         </td>
                         <td>{{ $item->author ?? 'Admin' }}</td>
                         <td>

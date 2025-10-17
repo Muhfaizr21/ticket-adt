@@ -94,7 +94,6 @@
         border-top-right-radius: 1rem;
         display: block;
     }
-
     /* gallery: grid with gap */
     .news-image-wrapper.gallery {
         display: grid;
