@@ -8,7 +8,7 @@ use App\Models\TicketType;
 use App\Models\Promotion;
 use App\Models\OrderPayment;
 use App\Models\PaymentMethod;
-use App\Models\Notification; // ✅ Tambahan
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -89,7 +89,6 @@ class OrderController extends Controller
 
         $ticket->decrement('available_tickets', $request->quantity);
 
-        // ✅ Buat notifikasi admin
         Notification::create([
             'title' => 'Pesanan Baru',
             'message' => 'User ' . Auth::user()->name . ' telah membuat pesanan baru untuk event ' . $order->event->name . '.',
@@ -128,7 +127,6 @@ class OrderController extends Controller
             'status' => 'pending',
         ]);
 
-        // ✅ Notifikasi admin upload bukti pembayaran
         Notification::create([
             'title' => 'Menunggu Verifikasi Pembayaran',
             'message' => 'User ' . Auth::user()->name . ' telah mengupload bukti pembayaran untuk pesanan #' . $order->id . '.',
@@ -182,5 +180,36 @@ class OrderController extends Controller
         $order->update(['checked_in_at' => now()]);
 
         return response()->json(['status' => 'success', 'message' => 'Tiket berhasil check-in!', 'order_id' => $order->id]);
+    }
+
+    public function destroy($id)
+    {
+        $order = Order::where('user_id', Auth::id())->findOrFail($id);
+
+        if ($order->status !== 'pending') {
+            return redirect()->route('orders.index')
+                ->with('error', 'Pesanan hanya bisa dihapus jika status masih pending.');
+        }
+
+        if ($order->ticketType) {
+            $order->ticketType->increment('available_tickets', $order->quantity);
+        }
+
+        if ($order->payment && $order->payment->proof_image) {
+            Storage::disk('public')->delete($order->payment->proof_image);
+            $order->payment->delete();
+        }
+
+        $order->delete();
+
+        Notification::create([
+            'title' => 'Pesanan Dihapus',
+            'message' => 'User ' . Auth::user()->name . ' telah menghapus pesanan #' . $id . '.',
+            'type' => 'order',
+            'is_read' => false,
+        ]);
+
+        return redirect()->route('orders.index')
+            ->with('success', 'Pesanan berhasil dihapus.');
     }
 }

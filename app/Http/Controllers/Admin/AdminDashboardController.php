@@ -12,7 +12,6 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        // --- Statistik Dasar ---
         $dashboardData['stats'] = [
             'total_orders' => Order::count(),
             'total_revenue' => Order::sum('total_price'),
@@ -20,22 +19,20 @@ class AdminDashboardController extends Controller
             'attendees_count' => User::whereHas('orders')->count(),
         ];
 
-        // --- Pendapatan Bulanan ---
         $monthlySales = Order::select(
-                DB::raw('MONTH(created_at) as month'),
-                DB::raw('SUM(total_price) as total')
-            )
-            ->whereYear('created_at', date('Y'))
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('SUM(total_price) as total')
+        )
+        ->whereYear('created_at', date('Y'))
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get();
 
         $dashboardData['monthly_sales'] = [
             'labels' => $monthlySales->pluck('month')->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray(),
             'data' => $monthlySales->pluck('total')->toArray(),
         ];
 
-        // --- Event Terpopuler ---
         $topEvents = Event::select('name')
             ->withSum('orders', 'total_price')
             ->withCount('orders')
@@ -52,7 +49,6 @@ class AdminDashboardController extends Controller
 
         $dashboardData['top_events'] = $topEvents;
 
-        // --- Order Terbaru ---
         $dashboardData['recent_orders'] = Order::latest()
             ->take(5)
             ->get()
@@ -67,5 +63,40 @@ class AdminDashboardController extends Controller
             });
 
         return view('admin.pages.dashboard', compact('dashboardData'));
+    }
+
+    public function getData()
+    {
+        $totalOrders = Order::count();
+        $totalRevenue = Order::sum('total_price');
+        $pendingOrders = Order::where('status', 'pending')->count();
+        $attendeesCount = User::whereHas('orders')->count();
+
+        // contoh growth 18.2% dummy — bisa diganti perhitungan beneran
+        $growthPercentage = 18.2;
+
+        $monthlySales = Order::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('SUM(total_price) as total')
+        )
+        ->whereYear('created_at', date('Y'))
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get();
+
+        $labels = $monthlySales->pluck('month')->map(fn($m) => date('M', mktime(0, 0, 0, $m, 1)))->toArray();
+        $values = $monthlySales->pluck('total')->toArray();
+
+        return response()->json([
+            'stats' => [
+                'total_orders' => $totalOrders,
+                'total_revenue' => $totalRevenue,
+                'pending_orders' => $pendingOrders,
+                'attendees_count' => $attendeesCount,
+                'growth' => $growthPercentage
+            ],
+            'labels' => $labels,
+            'values' => $values
+        ]);
     }
 }

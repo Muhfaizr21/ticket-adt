@@ -4,38 +4,42 @@
 @section('page-title', $item->title)
 
 @section('content')
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-
-            {{-- Gambar Berita --}}
-            @if($item->image)
-            <div class="mb-4 position-relative overflow-hidden rounded shadow-sm news-detail-img-wrapper">
+<div class="news-detail-container py-5">
+    <div class="container">
+        {{-- 🖼 Hero Image --}}
+        @if($item->image)
+        <div class="news-hero mb-5">
+            <div class="image-wrapper position-relative">
                 <img src="{{ asset('storage/' . $item->image) }}"
                      alt="{{ $item->title }}"
-                     class="img-fluid news-detail-img w-100">
-                <div class="overlay position-absolute top-0 start-0 w-100 h-100"></div>
+                     class="news-hero-img img-fluid w-100">
+                <div class="hero-overlay position-absolute top-0 start-0 w-100 h-100"></div>
+                <div class="hero-title position-absolute bottom-0 start-0 text-white p-4">
+                    <h1 class="fw-bold">{{ $item->title }}</h1>
+                    <div class="meta d-flex flex-wrap gap-2 mt-2">
+                        <span><i class="bi bi-person-circle me-1"></i> {{ $item->author ?? 'Admin' }}</span>
+                        <span>|</span>
+                        <span><i class="bi bi-calendar-event me-1"></i> {{ $item->published_at ? $item->published_at->format('d M Y') : '-' }}</span>
+                    </div>
+                </div>
             </div>
-            @endif
+        </div>
+        @endif
 
-            {{-- Judul & Informasi --}}
-            <h1 class="fw-bold mb-2">{{ $item->title }}</h1>
-            <div class="text-muted mb-4 d-flex flex-wrap gap-2 align-items-center">
-                <div><i class="bi bi-person-circle me-1"></i> {{ $item->author ?? 'Admin' }}</div>
-                <div class="mx-1">|</div>
-                <div><i class="bi bi-calendar-event me-1"></i> {{ $item->published_at ? $item->published_at->format('d M Y') : '-' }}</div>
+        {{-- 📝 Konten Berita --}}
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="news-content bg-white p-4 p-md-5 rounded shadow-sm mb-5">
+                    {!! nl2br(e($item->content)) !!}
+                </div>
+
+                {{-- 🔙 Tombol Kembali --}}
+                <div class="d-flex justify-content-start">
+                    <a href="{{ route('news') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="bi bi-arrow-left me-1"></i> Kembali ke Berita
+                    </a>
+                </div>
             </div>
-
-            {{-- Isi Berita --}}
-            <div class="news-content mb-5">
-                {!! nl2br(e($item->content)) !!}
-            </div>
-
-            {{-- Tombol Kembali --}}
-            <a href="{{ route('news') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> Kembali ke Berita
-            </a>
-
         </div>
     </div>
 </div>
@@ -43,30 +47,43 @@
 @push('styles')
 <style>
     body {
-        background: #f5f5f7;
+        background-color: #f4f6f8;
         color: #333;
+        font-family: 'Poppins', sans-serif;
     }
 
-    /* Gambar Berita */
-    .news-detail-img-wrapper {
-        max-height: 400px;
+    /* Hero Image Section */
+    .news-hero {
+        max-height: 450px;
+        border-radius: 15px;
         overflow: hidden;
-        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        position: relative;
     }
-    .news-detail-img {
+
+    .news-hero-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.5s ease;
+        transition: transform 0.8s ease;
     }
-    .news-detail-img-wrapper:hover .news-detail-img {
+
+    .news-hero:hover .news-hero-img {
         transform: scale(1.05);
     }
 
-    /* Judul */
-    h1 {
-        font-size: 2.2rem;
-        color: #111;
+    .hero-overlay {
+        background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%);
+    }
+
+    .hero-title h1 {
+        font-size: 2.5rem;
+        line-height: 1.3;
+    }
+
+    .hero-title .meta {
+        font-size: 0.95rem;
+        opacity: 0.9;
     }
 
     /* Konten */
@@ -77,16 +94,25 @@
         white-space: pre-line;
     }
 
-    /* Tombol */
+    /* Tombol kembali */
     .btn-outline-secondary {
-        border-radius: 8px;
-        padding: 0.5rem 1.25rem;
+        border-radius: 30px;
         font-weight: 500;
         transition: all 0.3s;
     }
     .btn-outline-secondary:hover {
         background-color: #6c757d;
         color: #fff;
+    }
+
+    /* Responsif */
+    @media (max-width: 768px) {
+        .hero-title h1 {
+            font-size: 1.8rem;
+        }
+        .news-content {
+            font-size: 1rem;
+        }
     }
 </style>
 @endpush

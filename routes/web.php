@@ -114,6 +114,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
 
     // 🏠 Dashboard
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('dashboard/data', [AdminDashboardController::class, 'getDashboardData'])->name('dashboard.data');
 
     // 👤 Profile Admin
     Route::prefix('profile')->name('profile.')->group(function () {
