@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             EventsTableSeeder::class,
             TicketTypesTableSeeder::class,
             PromotionsTableSeeder::class,
+            PaymentMethodsTableSeeder::class,
         ]);
     }
 }

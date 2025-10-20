@@ -28,39 +28,43 @@
                     @php
                         use Milon\Barcode\DNS1D;
                         use SimpleSoftwareIO\QrCode\Facades\QrCode;
-                        $barcode = new DNS1D();
-                        $barcode->setStorPath(public_path('barcodes/'));
-                        $barcodeImage = $order->barcode_code ? $barcode->getBarcodePNG($order->barcode_code, 'C39+', 2, 80, [0,0,0], true) : '';
+                        $barcodeImage = null;
                     @endphp
 
-                    {{-- Barcode --}}
-                    @if($barcodeImage)
+                    {{-- Cek pembayaran & refund --}}
+                    @if($order->payment && $order->payment->status === 'verified' && $order->refund_status !== 'refunded' && $order->barcode_code)
+                        @php
+                            $barcode = new DNS1D();
+                            $barcode->setStorPath(public_path('barcodes/'));
+                            $barcodeImage = $barcode->getBarcodePNG($order->barcode_code, 'C39+', 2, 80, [0,0,0], true);
+                        @endphp
+
+                        {{-- Barcode --}}
                         <div class="mb-3">
                             <h6 class="fw-semibold mb-1">🔢 Barcode</h6>
                             <img src="data:image/png;base64,{{ $barcodeImage }}" class="img-fluid border rounded p-2 bg-white shadow-sm">
                         </div>
-                    @endif
 
-                    {{-- QR Code --}}
-                    @if($order->barcode_code)
+                        {{-- QR Code --}}
                         <div class="mb-3">
                             <h6 class="fw-semibold mb-1">🔲 QR Code</h6>
                             <div class="d-inline-block p-2 bg-white border rounded shadow-sm">
                                 {!! QrCode::size(150)->margin(1)->generate($order->barcode_code) !!}
                             </div>
                         </div>
+                    @elseif($order->refund_status === 'refunded')
+                        <p class="text-danger fw-semibold">
+                            ⚠️ Order ini telah di-refund. Barcode dan QR Code tidak tersedia karena dana sudah dikembalikan.
+                        </p>
+                    @else
+                        <p class="text-muted small mt-3">
+                            📌 Barcode dan QR Code akan muncul setelah pembayaran diverifikasi oleh admin.
+                        </p>
                     @endif
 
                     <p class="text-muted small mt-3">
                         📸 Screenshot tiket ini untuk check-in di lokasi acara
                     </p>
-
-                    {{-- Download button --}}
-                    {{-- @if ($order->payment && $order->payment->status === 'verified')
-                        <a href="{{ route('orders.downloadBarcode', $order->id) }}" class="btn btn-success mt-3">
-                            <i class="bi bi-download"></i> Unduh Barcode
-                        </a>
-                    @endif --}}
                 </div>
 
                 <div class="ticket-footer bg-light py-2 px-3 rounded-bottom">
@@ -113,7 +117,9 @@
                             @endif
                         </p>
                         <p class="mb-0"><strong>Status Refund:</strong>
-                            <span class="badge bg-secondary">{{ $order->refund_status ?? 'None' }}</span>
+                            <span class="badge bg-{{ $order->refund_status === 'refunded' ? 'danger' : ($order->refund_status === 'approved' ? 'info' : 'secondary') }}">
+                                {{ ucfirst($order->refund_status ?? 'None') }}
+                            </span>
                         </p>
                     </div>
 

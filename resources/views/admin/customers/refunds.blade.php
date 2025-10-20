@@ -41,6 +41,7 @@
                                     'requested' => 'warning',
                                     'approved' => 'success',
                                     'rejected' => 'danger',
+                                    'refunded' => 'primary',
                                     default => 'secondary',
                                 };
                             @endphp
@@ -69,6 +70,18 @@
                                     @method('PUT')
                                     <button type="submit" class="btn btn-sm btn-danger mb-1">
                                         <i class="bi bi-x-circle"></i> Tolak
+                                    </button>
+                                </form>
+
+                            @elseif($refund->refund_status === 'approved')
+                                {{-- Tombol Mark as Refunded --}}
+                                <form
+                                    action="{{ route('admin.customers.refunds.update', ['order' => $refund->id, 'status' => 'refunded']) }}"
+                                    method="POST" class="d-inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="btn btn-sm btn-primary mb-1">
+                                        <i class="bi bi-cash-stack"></i> Refunded
                                     </button>
                                 </form>
                             @else

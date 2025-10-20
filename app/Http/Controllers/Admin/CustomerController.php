@@ -26,17 +26,26 @@ class CustomerController extends Controller
      */
     public function updateRefundStatus(Order $order, $status)
     {
-        if (!in_array($status, ['approved', 'rejected'])) {
+        if (!in_array($status, ['approved', 'rejected', 'refunded'])) {
             return redirect()->back()->with('error', 'Status refund tidak valid.');
         }
 
-        // Hanya boleh update jika status sekarang 'requested'
-        if ($order->refund_status !== 'requested') {
-            return redirect()->back()->with('error', 'Refund sudah diproses sebelumnya.');
+        // Jika status masih 'requested' atau 'approved', bisa diupdate
+        if ($status === 'approved' && $order->refund_status !== 'requested') {
+            return redirect()->back()->with('error', 'Hanya refund yang baru diajukan bisa disetujui.');
+        }
+
+        if ($status === 'rejected' && $order->refund_status !== 'requested') {
+            return redirect()->back()->with('error', 'Hanya refund yang baru diajukan bisa ditolak.');
+        }
+
+        if ($status === 'refunded' && $order->refund_status !== 'approved') {
+            return redirect()->back()->with('error', 'Hanya refund yang sudah disetujui bisa ditandai refunded.');
         }
 
         $updateData = ['refund_status' => $status];
-        if ($status === 'approved') {
+
+        if ($status === 'refunded') {
             $updateData['refunded_at'] = now();
         }
 

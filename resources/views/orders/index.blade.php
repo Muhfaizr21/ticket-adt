@@ -109,11 +109,31 @@
                     @endif
                 </td>
                 <td>
-                    @if($order->refund_status == 'none')
-                        <span class="badge-status badge-none">None</span>
-                    @else
-                        <span class="badge-status badge-refund">{{ ucfirst($order->refund_status) }}</span>
-                    @endif
+                    @php
+                        $refund = $order->refund_status ?? 'none';
+                        switch($refund) {
+                            case 'refunded':
+                                $refundLabel = 'Refunded';
+                                $refundBadge = 'badge-success';
+                                break;
+                            case 'approved':
+                                $refundLabel = 'Approved';
+                                $refundBadge = 'badge-refund';
+                                break;
+                            case 'rejected':
+                                $refundLabel = 'Rejected';
+                                $refundBadge = 'badge-failed';
+                                break;
+                            case 'requested':
+                                $refundLabel = 'Requested';
+                                $refundBadge = 'badge-warning';
+                                break;
+                            default:
+                                $refundLabel = 'None';
+                                $refundBadge = 'badge-none';
+                        }
+                    @endphp
+                    <span class="badge-status {{ $refundBadge }}">{{ $refundLabel }}</span>
                 </td>
                 <td>
                     <div class="action-buttons">
@@ -134,16 +154,18 @@
                         </form>
                         @endif
 
-                        <!-- Request Refund (hanya jika paid & belum request / rejected) -->
+                        <!-- Refund actions -->
                         @if($order->status == 'paid')
-                            @if($order->refund_status == 'none' || $order->refund_status == 'rejected')
+                            @if($refund == 'none' || $refund == 'rejected')
                                 <a href="{{ route('refunds.create', $order->id) }}" class="btn btn-sm btn-warning">
                                     <i class="bi bi-arrow-counterclockwise"></i> Refund
                                 </a>
-                            @elseif($order->refund_status == 'approved')
+                            @elseif($refund == 'approved')
                                 <a href="{{ route('refunds.create', $order->id) }}" class="btn btn-sm btn-success">
                                     <i class="bi bi-cash-stack"></i> Kirim Info Transfer
                                 </a>
+                            @elseif($refund == 'refunded')
+                                <span class="text-muted">Dana sudah dikembalikan</span>
                             @endif
                         @endif
                     </div>
