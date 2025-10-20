@@ -3,10 +3,14 @@
 @section('title', 'Buy Tickets')
 
 @section('content')
-    <div class="dashboard-container">
+@php
+use Illuminate\Support\Str;
+@endphp
 
-        @foreach($festivalData as $event)
-            <!-- Image Gallery Section -->
+<div class="dashboard-container">
+    @foreach($festivalData as $index => $event)
+        @if($index == 0)
+            <!-- ================= Event Pertama: Full Detail ================= -->
             <section class="image-gallery">
                 <div class="container">
                     <div class="gallery-grid">
@@ -26,24 +30,16 @@
                 </div>
             </section>
 
-            <!-- Festival Details Section -->
             <section class="festival-details">
                 <div class="container">
                     <div class="details-grid">
-
-                        <!-- Left Column - Festival Info -->
+                        <!-- Left Column -->
                         <div class="festival-info">
                             <div class="festival-header">
                                 <h1 class="festival-title">{{ $event['title'] }}</h1>
                                 <div class="festival-actions">
-                                    <button class="btn-action">
-                                        <i class="bi bi-heart"></i>
-                                        Add to favorites
-                                    </button>
-                                    <button class="btn-action">
-                                        <i class="bi bi-share"></i>
-                                        Share this event
-                                    </button>
+                                    <button class="btn-action"><i class="bi bi-heart"></i> Add to favorites</button>
+                                    <button class="btn-action"><i class="bi bi-share"></i> Share this event</button>
                                     <div class="rating">
                                         <div class="stars">
                                             @for ($i = 1; $i <= 5; $i++)
@@ -61,7 +57,6 @@
                                 </div>
                             </div>
 
-                            <!-- When & Where Section -->
                             <div class="info-section">
                                 <div class="info-grid">
                                     <div class="info-item">
@@ -87,16 +82,14 @@
                                 </div>
                             </div>
 
-                            <!-- About This Event -->
                             <div class="info-section">
                                 <h2 class="section-title">About this event</h2>
                                 <p>{{ $event['description'] }}</p>
                             </div>
                         </div>
 
-                        <!-- Right Column - Ticket & Location -->
+                        <!-- Right Column -->
                         <div class="festival-sidebar">
-                            <!-- Ticket Price Card -->
                             <div class="sidebar-card">
                                 <h2 class="card-title">Harga Tiket</h2>
                                 <div class="ticket-options">
@@ -121,8 +114,6 @@
                                                         Rp {{ number_format((float) ($ticket['final_price'] ?? 0), 0, ',', '.') }}
                                                     </span>
                                                 @endif
-
-                                                <!-- Tombol pilih tiket diarahkan ke route pembelian -->
                                                 <a href="{{ route('orders.create', ['event' => $event['id'], 'ticket_type' => $ticket['id']]) }}"
                                                     class="btn btn-primary btn-ticket mt-2">
                                                     Pilih
@@ -132,12 +123,10 @@
                                     @endforeach
                                 </div>
                                 <div class="age-restriction">
-                                    <i class="bi bi-info-circle"></i>
-                                    Minimal usia {{ $event['min_age'] ?? 17 }} tahun
+                                    <i class="bi bi-info-circle"></i> Minimal usia {{ $event['min_age'] ?? 17 }} tahun
                                 </div>
                             </div>
 
-                            <!-- Location Card -->
                             <div class="sidebar-card">
                                 <h2 class="card-title">Lokasi di peta</h2>
                                 <div class="location-map">
@@ -149,45 +138,102 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- More Events Like This -->
-                    @if(!empty($event['similar_events']))
-                        <div class="more-events-section">
-                            <div class="more-events-header">
-                                <h2 class="section-title">Event serupa lainnya</h2>
-                            </div>
-                            <div class="events-grid">
-                                @foreach ($event['similar_events'] as $sim)
-                                    <div class="event-card">
-                                        <div class="event-card-header">
-                                            <div class="event-price-badge">
-                                                <span>From</span> Rp {{ $sim['price'] ?? '450' }}k
-                                            </div>
-                                            <div class="event-image">
-                                                <img src="{{ asset('storage/' . $sim['image']) }}" alt="{{ $sim['title'] }}">
-                                            </div>
-                                        </div>
-                                        <div class="event-content">
-                                            <h3 class="event-title">{{ $sim['title'] }}</h3>
-                                            <p class="event-description-short">{{ $sim['description'] }}</p>
-                                            <div class="event-time">
-                                                <i class="bi bi-clock"></i>
-                                                <span>{{ $sim['time'] }}</span>
-                                            </div>
-                                            <a href="{{ route('tickets.show', $sim['id']) }}"
-                                                class="btn btn-outline-primary btn-buy-ticket">
-                                                <i class="bi bi-ticket-perforated"></i> Beli Tiket
-                                            </a>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-
                 </div>
             </section>
-        @endforeach
+        @endif
+    @endforeach
 
-    </div>
+    <!-- ================= Event Kedua dst: Card Horizontal Profesional ================= -->
+    @if($festivalData->count() > 1)
+    <section class="more-events-scroll my-4">
+        <div class="container">
+            <h2 class="section-title">Event Lainnya</h2>
+            <div class="scroll-row">
+                @foreach($festivalData->skip(1) as $event)
+                    <div class="event-card-small">
+                        <div class="event-card-image">
+                            <img src="{{ asset('storage/' . $event['poster']) }}" alt="{{ $event['title'] }}">
+                        </div>
+                        <div class="event-card-info">
+                            <h3>{{ $event['title'] }}</h3>
+                            <p>{{ Str::limit($event['description'], 80) }}</p>
+                            <a href="{{ route('shop.index', $event['id']) }}" class="btn btn-primary btn-block">
+                                Lihat Event
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+</div>
+
+<!-- ================= CSS Internal ================= -->
+<style>
+.more-events-scroll .scroll-row {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scroll-snap-type: x mandatory;
+}
+
+.more-events-scroll .scroll-row::-webkit-scrollbar {
+    height: 8px;
+}
+
+.more-events-scroll .scroll-row::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+}
+
+.event-card-small {
+    min-width: 250px;
+    max-width: 250px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    scroll-snap-align: start;
+    transition: transform 0.3s;
+}
+
+.event-card-small:hover {
+    transform: translateY(-5px);
+}
+
+.event-card-small img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.event-card-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+}
+
+.event-card-info h3 {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.event-card-info p {
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.event-card-info .btn-block {
+    margin-top: auto;
+    width: 100%;
+}
+</style>
 @endsection
