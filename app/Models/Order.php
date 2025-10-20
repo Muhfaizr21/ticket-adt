@@ -19,6 +19,7 @@ class Order extends Model
         'status',
         'refund_status',
         'refund_reason',
+        'bank_info',
         'refunded_at',
     ];
 

@@ -1,179 +1,197 @@
+@extends('layouts.app')
 @php
     use Illuminate\Support\Str;
 @endphp
-@extends('layouts.app')
 
-@section('title', 'Shop - Event List')
+@section('title', 'Shop - Daftar Event')
 
 @section('content')
-    <div class="container my-5">
-        <h1 class="mb-5 text-center fw-bold" style="font-size: 2rem; color: #1b1b1b;">
-            🎟️ Daftar Event
-        </h1>
+<div class="main-container pd-ltr-20 xs-pd-20-10">
+    <div class="min-height-200px">
+        <div class="page-header mb-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="title">
+                        <h4>🎟️ Daftar Event</h4>
+                    </div>
+                    <nav aria-label="breadcrumb" role="navigation">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item active" aria-current="page">Shop</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
 
-        <div class="row g-4 justify-content-center">
-            @forelse($events as $event)
-                @php
-                    $ticket = $event->ticketTypes->first();
-                    $promo = $ticket && $ticket->promotions->first() ? $ticket->promotions->first() : null;
-                    $finalPrice = $ticket ? $ticket->price : 0;
+        <div class="product-wrap">
+            {{-- Menggunakan clearfix dan row untuk layout grid --}}
+            <div class="row clearfix">
+                @forelse($events as $event)
+                    @php
+                        // Ambil tiket termurah atau yang pertama untuk ditampilkan harganya
+                        $ticket = $event->ticketTypes->sortBy('price')->first() ?? null;
+                        $finalPrice = $ticket ? $ticket->price : 0;
+                        $promotion = $ticket ? $ticket->promotions->first() : null;
+                        $hasPromo = (bool) $promotion;
+                        
+                        // Hitung harga asli sebelum diskon jika ada promo
+                        $originalPrice = $hasPromo ? ($ticket->price + $promotion->value) : $finalPrice;
+                    @endphp
 
-                    if ($promo) {
-                        if ($promo->persen_diskon) {
-                            $finalPrice -= ($finalPrice * $promo->persen_diskon / 100);
-                        } elseif ($promo->value) {
-                            $finalPrice -= $promo->value;
-                        }
-                    }
-                @endphp
-
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <div class="event-card shadow-sm position-relative h-100">
-
-                        {{-- Poster --}}
-                        <div class="poster-wrapper">
-                            <img src="{{ $event->poster ? asset('storage/' . $event->poster) : asset('images/default-poster.jpg') }}"
-                                 alt="{{ $event->name }}">
-
-                            @if(\Carbon\Carbon::parse($event->created_at)->gt(now()->subDays(7)))
-                                <span class="badge bg-primary badge-top-left">🆕 Baru</span>
-                            @endif
-                            @if($event->available_tickets > 50)
-                                <span class="badge bg-warning text-dark badge-top-right">🔥 Trending</span>
-                            @endif
-                            @if($event->available_tickets <= 0)
-                                <span class="badge bg-danger badge-top-right" style="right: 80px;">Sold Out</span>
-                            @endif
-                        </div>
-
-                        {{-- Body --}}
-                        <div class="p-3 d-flex flex-column gap-1">
-                            <h5 class="fw-bold text-truncate mb-1">{{ $event->name }}</h5>
-                            <div class="text-muted small mb-2 d-flex flex-column gap-1">
-                                <div>
-                                    <i class="bi bi-calendar-event me-1"></i>
-                                    {{ \Carbon\Carbon::parse($event->date)->format('d M Y') }}
-                                </div>
-                                <div>
-                                    <i class="bi bi-geo-alt me-1"></i>
-                                    {{ Str::limit($event->location, 25) }}
-                                </div>
-                            </div>
-
-                            {{-- Harga tiket + promo --}}
-                            <div class="mb-3 mt-1">
-                                @if($ticket)
-                                    <span class="fw-bold text-success fs-6">
-                                        Rp {{ number_format($finalPrice, 0, ',', '.') }}
+                    {{-- Setiap event kini berada di dalam col-lg-3 dengan margin bawah --}}
+                    <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-4">
+                        <div class="da-card box-shadow h-100">
+                            {{-- Foto Event --}}
+                            <div class="da-card-photo position-relative">
+                                <img src="{{ $event->poster ? asset('storage/' . $event->poster) : asset('images/default-poster.jpg') }}" alt="{{ $event->name }}">
+                                @if($event->available_tickets <= 0)
+                                    <span class="badge bg-danger position-absolute top-0 end-0 m-2">Sold Out</span>
+                                @endif
+                                @if($hasPromo)
+                                    <span class="badge bg-success position-absolute top-0 start-0 m-2">
+                                        {{ $promotion->name }}
                                     </span>
-                                    @if($promo)
-                                        <span class="badge bg-success ms-1">{{ $promo->name }}</span>
-                                    @endif
-                                @else
-                                    <span class="text-danger fw-semibold">Tiket belum tersedia</span>
                                 @endif
                             </div>
 
-                            {{-- Action Buttons --}}
-                            <div class="mt-auto d-grid gap-2">
-                                <a href="{{ route('shop.show', $event->id) }}" class="btn btn-primary btn-sm rounded-pill">
-                                    <i class="bi bi-eye me-1"></i> Lihat Detail
-                                </a>
+                            {{-- Detail Event --}}
+                            <div class="da-card-content p-3 d-flex flex-column">
+                                <h5 class="font-weight-bold mb-1 text-dark">
+                                    {{ Str::limit($event->name, 35) }}
+                                </h5>
+                                
+                                {{-- Harga --}}
+                                <div class="price-section mb-2">
+                                    @if($hasPromo)
+                                        <span class="original-price me-2">
+                                            Rp {{ number_format($originalPrice, 0, ',', '.') }}
+                                        </span>
+                                        <span class="final-price text-primary fw-bold">
+                                            Rp {{ number_format($finalPrice, 0, ',', '.') }}
+                                        </span>
+                                    @else
+                                        <span class="final-price text-primary fw-bold">
+                                            Rp {{ number_format($finalPrice, 0, ',', '.') }}
+                                        </span>
+                                    @endif
+                                </div>
+                                
+                                {{-- Lokasi & Tanggal --}}
+                                <p class="text-muted small mb-3 flex-grow-1">
+                                    <i class="icon-copy bi bi-calendar-event me-1"></i> 
+                                    {{ \Carbon\Carbon::parse($event->date)->format('d M Y') }}<br>
+                                    <i class="icon-copy bi bi-geo-alt me-1"></i> 
+                                    {{ Str::limit($event->location, 30) }}
+                                </p>
 
-                                @if($event->available_tickets > 0 && $ticket)
-                                    <form action="{{ route('orders.store') }}" method="POST" class="d-grid">
-                                        @csrf
-                                        <input type="hidden" name="event_id" value="{{ $event->id }}">
-                                        <input type="hidden" name="ticket_type_id" value="{{ $ticket->id }}">
-                                        <button type="submit" class="btn btn-outline-success btn-sm rounded-pill">
-                                            <i class="bi bi-cart-fill me-1"></i> Add to Cart
-                                        </button>
-                                    </form>
-                                @else
-                                    <button class="btn btn-secondary btn-sm rounded-pill" disabled>
-                                        <i class="bi bi-x-circle me-1"></i> Sold Out
-                                    </button>
-                                @endif
+                                {{-- Tombol Pilih Tiket --}}
+                                <a href="{{ route('shop.show', $event->id) }}" class="btn btn-outline-primary btn-sm w-100 mt-auto">
+                                    Pilih Tiket
+                                </a>
                             </div>
                         </div>
                     </div>
-                </div>
-            @empty
-                <div class="col-12 text-center py-5">
-                    <p class="text-muted fs-5">🚫 Tidak ada event tersedia saat ini.</p>
-                </div>
-            @endforelse
-        </div>
+                @empty
+                    <div class="col-12 text-center py-5">
+                        <p class="text-muted fs-5">🚫 Tidak ada event tersedia saat ini.</p>
+                    </div>
+                @endforelse
+            </div>
 
-        {{-- Pagination --}}
-        <div class="d-flex justify-content-center mt-5">
-            {{ $events->links() }}
+            {{-- Pagination --}}
+            <div class="blog-pagination mb-30">
+                <div class="btn-toolbar justify-content-center">
+                    {{ $events->links() }}
+                </div>
+            </div>
         </div>
     </div>
+</div>
 @endsection
 
 @push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
-    body {
-        background: #f5f6fa;
-    }
+/* =========================
+    DeskApp Style Cards
+========================= */
 
-    .event-card {
-        background: #fff;
-        border-radius: 16px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
+/* Perbaikan untuk masalah floating dan clearance pada DeskApp */
+.product-wrap {
+    overflow: hidden; /* Tambahkan ini untuk menampung floating child (kolom) */
+    padding: 10px; /* Sedikit padding pada container utama */
+}
 
-    .event-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-    }
+.row.clearfix {
+    clear: both;
+}
 
-    .poster-wrapper {
-        position: relative;
-        height: 200px;
-        overflow: hidden;
-    }
+.da-card {
+    /* Mengikuti gaya kartu Help Center Anda: rounded, white background, subtle shadow */
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    background-color: #fff;
+    border: none; /* Hilangkan border, hanya pakai shadow */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* Shadow seperti Help Card */
+    display: flex; 
+    flex-direction: column;
+    height: 100%; /* Penting: Pastikan card mengisi tinggi kolom */
+    box-sizing: border-box; 
+}
 
-    .poster-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s ease;
-    }
+.da-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1); /* Shadow saat hover, seperti Help Card */
+}
 
-    .event-card:hover .poster-wrapper img {
-        transform: scale(1.05);
-    }
+.da-card-photo {
+    height: 180px;
+    overflow: hidden;
+    position: relative;
+    border-top-left-radius: 11px;
+    border-top-right-radius: 11px;
+}
 
-    .badge-top-left,
-    .badge-top-right {
-        position: absolute;
-        top: 10px;
-        font-size: 0.75rem;
-        padding: 5px 8px;
-        border-radius: 6px;
-    }
+.da-card-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
 
-    .badge-top-left { left: 10px; }
-    .badge-top-right { right: 10px; }
+.da-card:hover img {
+    transform: scale(1.03); 
+}
 
-    .card-body .btn {
-        font-size: 0.85rem;
-    }
+/* Bagian konten/text di bawah foto */
+.da-card-content {
+    flex-grow: 1;
+    padding: 1rem;
+}
 
-    .btn-sm {
-        padding: 6px 12px;
-    }
+/* Gaya Harga */
+.price-section .final-price {
+    font-size: 1.15rem;
+    color: #2980b9; /* Menggunakan warna biru dari Help Center Anda */
+    font-weight: 700;
+}
 
-    @media (max-width: 576px) {
-        .poster-wrapper {
-            height: 150px;
-        }
-        .event-card {
-            border-radius: 12px;
-        }
-    }
+.price-section .original-price {
+    font-size: 0.9rem;
+    color: #999;
+    text-decoration: line-through;
+    font-weight: 400;
+}
+
+/* Responsif */
+@media (max-width: 991.98px) {
+    .da-card-photo { height: 160px; }
+}
+
+@media (max-width: 575.98px) {
+    .da-card-photo { height: 140px; }
+}
 </style>
 @endpush

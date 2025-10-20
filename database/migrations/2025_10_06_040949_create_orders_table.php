@@ -26,7 +26,7 @@ return new class extends Migration {
                 ->default('pending')
                 ->comment('Status pembayaran order');
 
-            $table->enum('refund_status', ['none', 'requested', 'approved', 'rejected'])
+            $table->enum('refund_status', ['none', 'requested', 'approved', 'rejected','refunded'])
                 ->default('none')
                 ->comment('Status refund tiket');
 
