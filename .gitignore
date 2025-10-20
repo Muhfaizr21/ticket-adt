@@ -4,6 +4,10 @@
 /public/hot
 /public/storage
 /storage/*.key
+!/storage/app/public/posters
+!/storage/app/public/posters/*
+!/storage/app/public/payment_qr
+!/storage/app/public/payment_qr/*
 /vendor
 .env
 .env.backup
