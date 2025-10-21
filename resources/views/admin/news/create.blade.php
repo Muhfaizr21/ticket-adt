@@ -142,7 +142,8 @@ label { font-size:0.92rem; color:var(--muted); }
 
         {{-- Actions --}}
         <div class="d-flex justify-content-end gap-2 mt-4">
-          <button type="button" id="btnSubmit" class="btn btn-primary-subtle btn-round">
+          <button type="submit" id="btnSubmit" class="btn btn-primary-subtle btn-round">
+
             <i class="bi bi-send me-1"></i> Simpan
           </button>
           <a href="{{ route('admin.news.index') }}" class="btn btn-secondary-subtle btn-round">Batal</a>
@@ -188,7 +189,9 @@ zone.addEventListener('drop', e => {
 });
 
 /* submit with sweetalert confirm */
-document.getElementById('btnSubmit').addEventListener('click', () => {
+const form = document.getElementById('newsForm');
+form.addEventListener('submit', function(e) {
+  e.preventDefault(); // cegah submit langsung
   Swal.fire({
     title: 'Simpan berita?',
     text: 'Data akan disimpan ke sistem.',
@@ -198,8 +201,9 @@ document.getElementById('btnSubmit').addEventListener('click', () => {
     cancelButtonText: 'Batal',
     confirmButtonColor: '#2563eb'
   }).then(res => {
-    if(res.isConfirmed) document.getElementById('newsForm').submit();
+    if(res.isConfirmed) form.submit();
   });
 });
+
 </script>
 @endpush

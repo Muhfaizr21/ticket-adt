@@ -8,7 +8,7 @@
     <p class="text-muted mb-4">Dapatkan update dan informasi terbaru seputar event dan aktivitas.</p>
 
     <div class="news-grid">
-        @foreach ($news as $item)
+        @forelse ($news as $item)
         <div class="news-card">
             @if($item->image)
             <div class="news-img">
@@ -32,11 +32,14 @@
                 </a>
             </div>
         </div>
-        @endforeach
+        @empty
+            <p class="text-muted">Belum ada berita untuk saat ini.</p>
+        @endforelse
     </div>
 
-    <div class="mt-4">
-        {{ $news->links() }}
+    <!-- Pagination -->
+    <div class="mt-5 d-flex justify-content-center">
+        {{ $news->onEachSide(1)->links('pagination::bootstrap-5') }}
     </div>
 </div>
 
@@ -121,6 +124,26 @@
     .news-btn:hover {
         color: #1d4ed8;
         text-decoration: underline;
+    }
+
+    /* Pagination Style */
+    .pagination {
+        justify-content: center;
+        font-size: 0.85rem;
+    }
+    .page-item .page-link {
+        border-radius: 8px !important;
+        padding: 6px 12px !important;
+        color: #2563eb;
+    }
+    .page-item.active .page-link {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+    }
+    .page-item:hover .page-link {
+        background-color: #eff6ff;
+        color: #1d4ed8;
     }
 
     @media (max-width: 576px) {
