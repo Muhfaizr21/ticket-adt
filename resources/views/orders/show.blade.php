@@ -28,6 +28,29 @@
                     @php
                         use Milon\Barcode\DNS1D;
                         use SimpleSoftwareIO\QrCode\Facades\QrCode;
+                        use Carbon\Carbon;
+
+                        $today = Carbon::now();
+                        $ticket = $order->ticketType;
+                        $ticketPromos = $ticket->promotions ?? collect();
+                        $promo = $ticketPromos
+                            ->where('is_active', 1)
+                            ->where('start_date', '<=', $today)
+                            ->where('end_date', '>=', $today)
+                            ->first();
+
+                        $originalPrice = $ticket->price;
+                        $finalPrice = $originalPrice;
+                        if($promo) {
+                            if($promo->persen_diskon) {
+                                $finalPrice -= ($finalPrice * $promo->persen_diskon / 100);
+                            } elseif($promo->value) {
+                                $finalPrice -= $promo->value;
+                            }
+                        }
+
+                        $totalPrice = $finalPrice * $order->quantity;
+
                         $barcodeImage = null;
                     @endphp
 
@@ -83,18 +106,23 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <p><strong>Event:</strong> {{ $order->event->name ?? '-' }}</p>
-                            <p><strong>Tipe Tiket:</strong> {{ $order->ticketType->name ?? '-' }}</p>
+                            <p><strong>Tipe Tiket:</strong> {{ $ticket->name ?? '-' }}</p>
                             <p><strong>Jumlah Tiket:</strong> {{ $order->quantity }}</p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Total Harga:</strong> Rp{{ number_format($order->total_price, 0, ',', '.') }}</p>
-                            @if ($order->ticketType->promotions && $order->ticketType->promotions->count())
+                            <p><strong>Total Harga:</strong>
+                                @if($promo)
+                                    <del>Rp{{ number_format($originalPrice * $order->quantity,0,',','.') }}</del>
+                                    Rp{{ number_format($totalPrice,0,',','.') }}
+                                @else
+                                    Rp{{ number_format($totalPrice,0,',','.') }}
+                                @endif
+                            </p>
+                            @if ($promo)
                                 <p><strong>Promo:</strong>
-                                    @foreach ($order->ticketType->promotions as $promo)
-                                        <span class="badge bg-info me-1">
-                                            {{ $promo->name }} - {{ $promo->persen_diskon ? $promo->persen_diskon.'%' : 'Rp'.number_format($promo->value,0,',','.') }}
-                                        </span>
-                                    @endforeach
+                                    <span class="badge bg-info me-1">
+                                        {{ $promo->name }} - {{ $promo->persen_diskon ? $promo->persen_diskon.'%' : 'Rp'.number_format($promo->value,0,',','.') }}
+                                    </span>
                                 </p>
                             @endif
                         </div>

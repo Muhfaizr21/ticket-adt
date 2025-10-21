@@ -8,11 +8,10 @@
 @section('content')
 <div class="main-container pd-ltr-20 xs-pd-20-10">
     <div class="min-height-200px">
-
+        
         {{-- === WRAPPER UTAMA DENGAN MARGIN SAMPING === --}}
         <div class="event-wrapper">
-            {{-- HEADER --}}
-            <div class="page-header text-center mb-5">
+            <div class="page-header text-center mb-5 mt-4">
                 <h4 class="fw-bold text-dark">🎟️ Daftar Event</h4>
             </div>
 
@@ -72,8 +71,8 @@
     max-width: 100%;
     padding-left: 6.5cm;
     padding-right: 6.5cm;
-    margin-top: 40px;
-    margin-bottom: 100px; /* 🔹 Tambahkan jarak bawah agar tidak rapat dengan detail event */
+    margin-top: 30px;
+    margin-bottom: 60px;
 }
 
 /* ======== GRID EVENT ======== */
@@ -147,7 +146,6 @@
     .event-wrapper {
         padding-left: 4cm;
         padding-right: 4cm;
-        margin-bottom: 80px;
     }
 }
 
@@ -155,7 +153,6 @@
     .event-wrapper {
         padding-left: 2cm;
         padding-right: 2cm;
-        margin-bottom: 70px;
     }
 
     .event-grid {
@@ -167,7 +164,6 @@
     .event-wrapper {
         padding-left: 1cm;
         padding-right: 1cm;
-        margin-bottom: 60px;
     }
 
     .event-grid {

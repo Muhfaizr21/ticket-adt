@@ -34,6 +34,17 @@ class ShopController extends Controller
                 ->whereDate('end_date', '>=', now());
         }])->findOrFail($id);
 
-        return view('shop.show', compact('event'));
+        // Ambil event serupa (misal: 4 event terbaru lain, bukan event ini)
+        $relatedEvents = Event::with(['ticketTypes.promotions' => function ($query) {
+            $query->where('is_active', 1)
+                ->whereDate('start_date', '<=', now())
+                ->whereDate('end_date', '>=', now());
+        }])
+        ->where('id', '!=', $id)
+        ->latest()
+        ->take(4)
+        ->get();
+
+        return view('shop.show', compact('event', 'relatedEvents'));
     }
 }

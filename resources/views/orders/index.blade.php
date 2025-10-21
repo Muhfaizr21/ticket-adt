@@ -39,11 +39,6 @@
         transition: 0.2s ease;
     }
 
-    .order-table td i {
-        cursor: pointer;
-        font-size: 18px;
-    }
-
     .badge-status {
         padding: 4px 8px;
         border-radius: 5px;
@@ -55,6 +50,7 @@
     .badge-failed { background-color: #dc3545; color: #fff; }
     .badge-none { background-color: #6c757d; color: #fff; }
     .badge-refund { background-color: #17a2b8; color: #fff; }
+    .badge-warning { background-color: #fd7e14; color: #fff; }
 
     .action-buttons {
         display: flex;
@@ -89,13 +85,42 @@
             </tr>
         </thead>
         <tbody>
+            @php use Carbon\Carbon; $today = Carbon::now(); @endphp
             @foreach($orders as $index => $order)
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $order->event->name }}</td>
                 <td>{{ $order->ticketType->name }}</td>
                 <td>{{ $order->quantity }}</td>
-                <td>Rp{{ number_format($order->total_price, 0, ',', '.') }}</td>
+                <td>
+                    @php
+                        $ticket = $order->ticketType;
+                        $ticketPromos = $ticket->promotions ?? collect();
+                        $promo = $ticketPromos
+                            ->where('is_active', 1)
+                            ->where('start_date', '<=', $today)
+                            ->where('end_date', '>=', $today)
+                            ->first();
+
+                        $originalPrice = $ticket->price;
+                        $finalPrice = $originalPrice;
+
+                        if($promo) {
+                            if($promo->persen_diskon) {
+                                $finalPrice -= ($finalPrice * $promo->persen_diskon / 100);
+                            } elseif($promo->value) {
+                                $finalPrice -= $promo->value;
+                            }
+                        }
+
+                        $total = $finalPrice * $order->quantity;
+                    @endphp
+
+                    @if($promo)
+                        <span class="text-muted"><del>Rp{{ number_format($originalPrice * $order->quantity, 0, ',', '.') }}</del></span><br>
+                    @endif
+                    <strong>Rp{{ number_format($total, 0, ',', '.') }}</strong>
+                </td>
                 <td>
                     @php $status = $order->payment ? $order->payment->status : 'none'; @endphp
                     @if($status == 'pending')
@@ -137,15 +162,12 @@
                 </td>
                 <td>
                     <div class="action-buttons">
-                        <!-- Lihat Detail -->
                         <a href="{{ route('orders.show', $order->id) }}" title="Lihat Detail" class="btn btn-sm btn-outline-primary">
                             <i class="bi bi-eye"></i> Detail
                         </a>
 
-                        <!-- Hapus (hanya jika pending) -->
                         @if($order->status == 'pending')
-                        <form action="{{ route('orders.destroy', $order->id) }}" method="POST"
-                            onsubmit="return confirm('Yakin ingin hapus pesanan ini?')">
+                        <form action="{{ route('orders.destroy', $order->id) }}" method="POST" onsubmit="return confirm('Yakin ingin hapus pesanan ini?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-outline-danger">
@@ -154,7 +176,6 @@
                         </form>
                         @endif
 
-                        <!-- Refund actions -->
                         @if($order->status == 'paid')
                             @if($refund == 'none' || $refund == 'rejected')
                                 <a href="{{ route('refunds.create', $order->id) }}" class="btn btn-sm btn-warning">

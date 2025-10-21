@@ -1,33 +1,28 @@
+@extends('layouts.app')
 @php
     use Illuminate\Support\Facades\Auth;
 @endphp
-
-@extends('layouts.app')
 
 @section('title', 'Upload Bukti Pembayaran')
 
 @section('content')
 <div class="container py-5">
-    <h2 class="fw-bold mb-4">💳 Upload Bukti Pembayaran</h2>
+    <h2 class="fw-bold mb-4 text-center">💳 Upload Bukti Pembayaran</h2>
 
     {{-- Flash Message --}}
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+    @foreach(['success', 'error'] as $msg)
+        @if(session($msg))
+            <div class="alert alert-{{ $msg }} alert-dismissible fade show" role="alert">
+                {{ session($msg) }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+    @endforeach
 
     {{-- Detail Order --}}
-    <div class="card order-card mb-4">
+    <div class="card mb-4 shadow-sm rounded-4 border-0">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div class="d-flex justify-content-between flex-wrap align-items-center mb-3">
                 <h5 class="fw-bold text-primary m-0">📦 Detail Order</h5>
                 <span class="badge bg-dark px-3 py-2 fs-6">{{ $order->barcode_code }}</span>
             </div>
@@ -63,7 +58,8 @@
                     @elseif($order->payment_method_type === 'qris')
                         <p><strong>Scan QRIS berikut untuk membayar:</strong></p>
                         <div class="bg-white border rounded shadow-sm p-2 d-inline-block">
-                            <img src="{{ asset('storage/' . $order->payment_method_info['qr_code_image']) }}" alt="QRIS" class="img-fluid" style="max-width: 200px;">
+                            <img src="{{ asset('storage/' . $order->payment_method_info['qr_code_image']) }}" 
+                                 alt="QRIS" class="img-fluid rounded" style="max-width:200px;">
                         </div>
                     @endif
                 </div>
@@ -72,7 +68,7 @@
     </div>
 
     {{-- Form Upload Bukti Pembayaran --}}
-    <div class="card payment-card mb-4">
+    <div class="card shadow-sm rounded-4 border-0">
         <div class="card-body">
             <h5 class="fw-bold text-primary mb-3">📤 Form Upload Bukti Pembayaran</h5>
             <hr>
@@ -106,8 +102,8 @@
                 @if($order->payment && $order->payment->proof_image)
                     <div class="mt-3">
                         <label class="form-label fw-semibold">Bukti Pembayaran Sebelumnya:</label><br>
-                        <img src="{{ asset('storage/' . $order->payment->proof_image) }}" alt="Bukti Pembayaran"
-                             class="img-fluid rounded shadow-sm border" style="max-width:300px;">
+                        <img src="{{ asset('storage/' . $order->payment->proof_image) }}" 
+                             alt="Bukti Pembayaran" class="img-fluid rounded shadow-sm border" style="max-width:300px;">
                     </div>
                 @endif
 
@@ -128,32 +124,25 @@
 
 @push('styles')
 <style>
-    .order-card,
-    .payment-card {
-        border: none;
-        border-radius: 1rem;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+.card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.card-body {
+    padding: 2rem;
+}
+.badge {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+label.form-label {
+    font-weight: 600;
+}
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1.5rem;
     }
-
-    .order-card .card-body,
-    .payment-card .card-body {
-        padding: 2rem;
-    }
-
-    .badge {
-        font-size: 0.9rem;
-        font-weight: 600;
-    }
-
-    label.form-label {
-        font-weight: 600;
-    }
-
-    @media (max-width: 576px) {
-        .order-card .card-body,
-        .payment-card .card-body {
-            padding: 1.5rem;
-        }
-    }
+}
 </style>
 @endpush

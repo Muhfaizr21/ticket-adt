@@ -1,153 +1,189 @@
 @extends('layouts.app')
+@php
+    use Illuminate\Support\Str;
+@endphp
 
 @section('title', $event->name)
 
 @section('content')
-<!-- ============================= -->
 <!-- HERO BANNER -->
-<!-- ============================= -->
-<section class="event-hero mb-5">
-    <img src="{{ $event->poster ? asset('storage/' . $event->poster) : asset('images/default-poster.jpg') }}" 
-         alt="{{ $event->name }}" class="hero-bg">
-    <div class="hero-overlay"></div>
-    <div class="hero-content container">
-        <h1 class="fw-bold mb-3">{{ $event->name }}</h1>
-        <div class="d-flex flex-wrap gap-4 text-light fs-6 justify-content-center">
-            <div>
-                <i class="bi bi-calendar-event me-2"></i>
-                {{ $event->date ? \Carbon\Carbon::parse($event->date)->format('d M Y') : '-' }}
-            </div>
-            <div>
-                <i class="bi bi-clock me-2"></i>
-                {{ $event->start_time ?? '-' }} - {{ $event->end_time ?? '-' }}
-            </div>
-            <div>
-                <i class="bi bi-geo-alt me-2"></i>
-                {{ $event->location ?? '-' }}
+<section class="event-hero mx-auto">
+    <div class="hero-container">
+        <img src="{{ $event->poster ? asset('storage/' . $event->poster) : asset('images/default-poster.jpg') }}" 
+             alt="{{ $event->name }}" class="hero-bg">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="fw-bold mb-1">{{ $event->name }}</h1>
+            <div class="d-flex flex-wrap gap-2 text-light fs-6 justify-content-center">
+                <div><i class="bi bi-calendar-event me-1"></i>{{ $event->date ? \Carbon\Carbon::parse($event->date)->format('d M Y') : '-' }}</div>
+                <div><i class="bi bi-clock me-1"></i>{{ $event->start_time ?? '-' }} - {{ $event->end_time ?? '-' }}</div>
+                <div><i class="bi bi-geo-alt me-1"></i>{{ $event->location ?? '-' }}</div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- ============================= -->
-<!-- EVENT DETAIL + TICKET SECTION -->
-<!-- ============================= -->
-<div class="container mb-5">
-    <div class="row g-4">
 
+<!-- EVENT DETAIL + TICKET -->
+<div class="container py-4 px-3 px-md-4">
+    <div class="row g-3">
         <!-- Deskripsi Event -->
         <div class="col-lg-8">
-            <div class="card event-detail-card border-0 shadow-sm p-4 rounded-4 mb-4">
-                <h4 class="fw-bold mb-3 text-dark">Tentang Event</h4>
-                <p class="text-secondary fs-6" style="line-height: 1.8;">
-                    {{ $event->description ?? 'Deskripsi tidak tersedia.' }}
-                </p>
-                <div class="mt-4 d-flex align-items-center text-muted">
-                    <i class="bi bi-building me-2"></i>
-                    <span>Venue ID: {{ $event->venue_id ?? '-' }}</span>
+            <div class="card event-detail-card p-3 rounded-3 shadow-sm">
+                <h4 class="fw-bold mb-2 text-dark">Tentang Event</h4>
+                <p class="text-secondary fs-6" style="line-height:1.6;">{{ $event->description ?? 'Deskripsi tidak tersedia.' }}</p>
+                <div class="d-flex align-items-center text-muted small mt-2">
+                    <i class="bi bi-building me-1"></i>Venue ID: {{ $event->venue_id ?? '-' }}
                 </div>
             </div>
         </div>
 
         <!-- Tiket -->
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 p-4 rounded-4 sticky-top ticket-section-card" style="top: 100px;">
-                <h5 class="fw-bold mb-4 text-dark">🎟️ Pilih Tiketmu</h5>
-
+            <div class="card ticket-section-card p-3 rounded-3 shadow-sm sticky-top">
+                <h5 class="fw-bold mb-3 text-dark">🎟️ Pilih Tiketmu</h5>
                 @forelse($event->ticketTypes as $ticket)
                     @php
                         $promo = $ticket->promotions->first() ?? null;
                         $finalPrice = $ticket->price;
                         if ($promo) {
-                            if ($promo->persen_diskon) {
-                                $finalPrice -= ($finalPrice * $promo->persen_diskon / 100);
-                            } elseif ($promo->value) {
-                                $finalPrice -= $promo->value;
-                            }
+                            if ($promo->persen_diskon) $finalPrice -= ($finalPrice * $promo->persen_diskon / 100);
+                            elseif ($promo->value) $finalPrice -= $promo->value;
                         }
                     @endphp
-
-                    <div class="ticket-card mb-3 p-3 rounded-3 position-relative {{ $ticket->available_tickets <= 0 ? 'sold-out' : '' }}">
-                        @if($promo)
-                            <div class="promo-tag"><i class="bi bi-star-fill me-1"></i> Promo</div>
-                        @endif
-
+                    <div class="ticket-card mb-2 p-2 rounded-2 {{ $ticket->available_tickets <= 0 ? 'sold-out' : '' }}">
+                        @if($promo)<div class="promo-tag"><i class="bi bi-star-fill me-1"></i> Promo</div>@endif
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <h6 class="fw-semibold mb-1 text-dark">{{ $ticket->name }}</h6>
+                                <h6 class="fw-semibold mb-1 text-dark small">{{ $ticket->name }}</h6>
                                 @if($promo)
-                                    <small class="text-muted">
-                                        <i class="bi bi-tag-fill text-success me-1"></i>{{ $promo->name }}
-                                        @if($promo->persen_diskon)
-                                            ({{ $promo->persen_diskon }}%)
-                                        @elseif($promo->value)
-                                            (Rp {{ number_format($promo->value, 0, ',', '.') }})
+                                    <small class="text-muted"><i class="bi bi-tag-fill text-success me-1"></i>{{ $promo->name }}
+                                        @if($promo->persen_diskon) ({{ $promo->persen_diskon }}%) 
+                                        @elseif($promo->value) (Rp {{ number_format($promo->value,0,',','.') }}) 
                                         @endif
                                     </small>
                                 @endif
                             </div>
-                            <div class="text-end">
-                                <span class="fw-bold text-success fs-6">Rp {{ number_format($finalPrice, 0, ',', '.') }}</span>
-                            </div>
+                            <div class="text-end"><span class="fw-bold text-success fs-7">Rp {{ number_format($finalPrice,0,',','.') }}</span></div>
                         </div>
-
-                        <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="d-flex justify-content-between align-items-center mt-2">
                             <small class="text-muted">Tersedia: {{ $ticket->available_tickets }} tiket</small>
                             @if($ticket->available_tickets > 0)
-                                <form action="{{ route('orders.create', $event->id) }}" method="GET" class="d-flex gap-2 align-items-center">
+                                <form action="{{ route('orders.create', $event->id) }}" method="GET" class="d-flex gap-1 align-items-center">
                                     <input type="hidden" name="ticket_type_id" value="{{ $ticket->id }}">
-                                    <input type="number" name="quantity" min="1" max="{{ $ticket->available_tickets }}" value="1" class="ticket-qty">
-                                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-3">
-                                        <i class="bi bi-cart-fill"></i> Beli
-                                    </button>
+                                    <input type="number" name="quantity" min="1" max="{{ $ticket->available_tickets }}" value="1" class="ticket-qty small-input">
+                                    <button type="submit" class="btn btn-success btn-sm rounded-pill px-2 py-0"><i class="bi bi-cart-fill"></i> Beli</button>
                                 </form>
                             @else
-                                <span class="sold-out-badge">Sold Out</span>
+                                <span class="sold-out-badge small">Sold Out</span>
                             @endif
                         </div>
                     </div>
                 @empty
-                    <p class="text-muted">Belum ada tiket tersedia.</p>
+                    <p class="text-muted mb-1 small">Belum ada tiket tersedia.</p>
                 @endforelse
-
-                <a href="{{ route('shop.index') }}" class="btn btn-outline-secondary w-100 mt-3">
-                    <i class="bi bi-arrow-left me-1"></i> Kembali ke Shop
-                </a>
+                <a href="{{ route('shop.index') }}" class="btn btn-outline-secondary w-100 mt-2 py-1 small"><i class="bi bi-arrow-left me-1"></i> Kembali ke Shop</a>
             </div>
         </div>
     </div>
+
+    <!-- EVENT SERUPA / GRID -->
+    @if($relatedEvents && $relatedEvents->count())
+    <div class="more-events-wrapper mt-4">
+        <h4 class="fw-bold mb-3 text-dark text-center small">🎫 Event Serupa</h4>
+        <div class="more-events-grid">
+            @foreach($relatedEvents as $relEvent)
+                @php
+                    $ticket = $relEvent->ticketTypes->sortBy('price')->first() ?? null;
+                    $finalPrice = $ticket ? $ticket->price : 0;
+                    $promo = $ticket ? $ticket->promotions->first() : null;
+                    $hasPromo = (bool) $promo;
+                    $originalPrice = $hasPromo ? ($ticket->price + $promo->value) : $finalPrice;
+                @endphp
+                <div class="event-card-mini">
+                    <div class="card-photo">
+                        <img src="{{ $relEvent->poster ? asset('storage/' . $relEvent->poster) : asset('images/default-poster.jpg') }}" alt="{{ $relEvent->name }}">
+                        @if($relEvent->available_tickets <= 0)
+                            <span class="badge bg-danger position-absolute top-0 end-0 m-1 fs-7">Sold Out</span>
+                        @endif
+                        @if($hasPromo)
+                            <span class="badge bg-success position-absolute top-0 start-0 m-1 fs-7">{{ $promo->name }}</span>
+                        @endif
+                    </div>
+                    <div class="card-content d-flex flex-column p-1">
+                        <h6 class="fw-bold mb-1 small">{{ Str::limit($relEvent->name,20) }}</h6>
+                        <div class="price-section mb-1">
+                            @if($hasPromo)
+                                <span class="original-price me-1">Rp {{ number_format($originalPrice,0,',','.') }}</span>
+                                <span class="final-price text-primary fw-bold">Rp {{ number_format($finalPrice,0,',','.') }}</span>
+                            @else
+                                <span class="final-price text-primary fw-bold">Rp {{ number_format($finalPrice,0,',','.') }}</span>
+                            @endif
+                        </div>
+                        <p class="text-muted small mb-1 flex-grow-1">
+                            <i class="bi bi-calendar-event me-1"></i> {{ \Carbon\Carbon::parse($relEvent->date)->format('d M Y') }}<br>
+                            <i class="bi bi-geo-alt me-1"></i> {{ Str::limit($relEvent->location, 20) }}
+                        </p>
+                        <a href="{{ route('shop.show', $relEvent->id) }}" class="btn btn-outline-primary btn-sm mt-auto w-100 py-1 small">Lihat Event</a>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </div>
 
 @push('styles')
 <style>
-    /* HERO SECTION */
-    .event-hero { position: relative; height: 400px; border-radius: 0 0 20px 20px; overflow: hidden; }
-    .hero-bg { width: 100%; height: 100%; object-fit: cover; filter: brightness(60%); transition: transform 0.4s ease; }
-    .event-hero:hover .hero-bg { transform: scale(1.05); }
-    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); }
-    .hero-content { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); text-align: center; color: #fff; }
+/* GENERAL CONTAINER PADDING */
+.container { max-width: 1200px; }
 
-    /* EVENT DETAIL CARD */
-    .event-detail-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+/* HERO */
+/* HERO */
+.event-hero { 
+    position: relative; 
+    margin: 20px auto; 
+    max-width: calc(100% - 40px); /* ±2cm kiri-kanan */
+    border-radius: 12px; 
+    overflow: hidden; 
+}
+.hero-container { position: relative; width: 100%; height: 320px; border-radius:12px; overflow:hidden; }
+.hero-bg { width:100%; height:100%; object-fit:cover; filter:brightness(60%); transition: transform 0.3s ease; border-radius:12px; }
+.event-hero:hover .hero-bg { transform: scale(1.03); }
+.hero-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.7), transparent); border-radius:12px; }
+.hero-content { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); text-align:center; color:#fff; padding:0 15px; max-width: calc(100% - 40px); }
 
-    /* TICKET CARD */
-    .ticket-section-card { background: #fff; border-radius: 16px; }
-    .ticket-card { background: #fff; border: 1px solid #eee; transition: all 0.3s ease; }
-    .ticket-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-    .promo-tag { position: absolute; top: -12px; right: -12px; background: #28a745; color: #fff; font-size: 0.8rem; padding: 6px 12px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-    .ticket-qty { width: 60px; text-align: center; border-radius: 8px; border: 1px solid #ccc; padding: 4px; }
-    .sold-out-badge { background: #dc3545; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; }
-    .ticket-card.sold-out { opacity: 0.7; }
+/* CARDS */
+.event-detail-card, .ticket-section-card, .event-card-mini { background:#fff; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.08); }
+.ticket-section-card { padding:15px; }
+.ticket-card { padding:10px; border-radius:8px; margin-bottom:5px; position:relative; font-size:0.85rem; transition: all 0.3s ease; }
+.ticket-card:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,0.15); }
+.ticket-card .promo-tag { position:absolute; top:5px; left:5px; background:#28a745; color:#fff; padding:2px 6px; border-radius:3px; font-size:0.65rem; }
 
-    /* BUTTON */
-    .btn-success { background: linear-gradient(135deg, #28a745, #36c060); border: none; font-weight: 600; transition: transform 0.2s ease; }
-    .btn-success:hover { background: linear-gradient(135deg, #36c060, #2ec45b); transform: scale(1.05); }
+/* MORE EVENTS GRID */
+.more-events-wrapper { margin-top:30px; margin-bottom:30px; }
+.more-events-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px; }
+.event-card-mini { display:flex; flex-direction:column; transition: transform 0.3s ease, box-shadow 0.3s ease; font-size:0.85rem; }
+.event-card-mini:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
+.card-photo { height:130px; overflow:hidden; position:relative; border-radius:8px 8px 0 0; }
+.card-photo img { width:100%; height:100%; object-fit:cover; transition: transform 0.3s ease; }
+.event-card-mini:hover img { transform: scale(1.03); }
+.card-content { padding:8px; }
+.price-section { font-size:0.8rem; }
+.original-price { text-decoration:line-through; color:#888; font-size:0.75rem; }
+.final-price { font-size:0.85rem; font-weight:bold; color:#03346E; }
+.btn-outline-primary { border-radius:6px; font-size:0.8rem; }
 
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
-        .event-hero { height: 260px; }
-        .hero-content h1 { font-size: 1.6rem; }
-    }
+/* INPUT SMALL */
+.ticket-qty.small-input { width:50px; height:28px; padding:0 4px; font-size:0.75rem; }
+
+/* RESPONSIVE */
+@media (max-width:992px) { 
+    .ticket-section-card { position:relative !important; top:0 !important; margin-bottom:20px; }
+}
+@media (max-width:768px) { 
+    .event-hero { height:200px; border-radius:10px; } 
+    .hero-content h1 { font-size:1.4rem; } 
+}
 </style>
 @endpush
-@endsection

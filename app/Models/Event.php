@@ -91,4 +91,8 @@ class Event extends Model
             $event->ticketTypes()->delete();
         });
     }
+    public function promotions()
+    {
+        return $this->hasMany(Promotion::class, 'event_id');
+    }
 }
