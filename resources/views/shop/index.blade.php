@@ -8,12 +8,16 @@
 @section('content')
 <div class="main-container pd-ltr-20 xs-pd-20-10">
     <div class="min-height-200px">
-        <div class="page-header mb-4">
-            <h4>🎟️ Daftar Event</h4>
-        </div>
 
-        <div class="shop-horizontal-scroll">
-            <div class="scroll-wrapper">
+        {{-- === WRAPPER UTAMA DENGAN MARGIN SAMPING === --}}
+        <div class="event-wrapper">
+            {{-- HEADER --}}
+            <div class="page-header text-center mb-5">
+                <h4 class="fw-bold text-dark">🎟️ Daftar Event</h4>
+            </div>
+
+            {{-- === GRID EVENT === --}}
+            <div class="event-grid">
                 @forelse($events as $event)
                     @php
                         $ticket = $event->ticketTypes->sortBy('price')->first() ?? null;
@@ -33,7 +37,7 @@
                                 <span class="badge bg-success position-absolute top-0 start-0 m-1 fs-6">{{ $promotion->name }}</span>
                             @endif
                         </div>
-                        <div class="card-content p-2 d-flex flex-column">
+                        <div class="card-content d-flex flex-column p-2">
                             <h6 class="fw-bold mb-1">{{ Str::limit($event->name, 20) }}</h6>
                             <div class="price-section mb-1">
                                 @if($hasPromo)
@@ -51,7 +55,7 @@
                         </div>
                     </div>
                 @empty
-                    <p class="text-muted fs-6">🚫 Tidak ada event tersedia.</p>
+                    <p class="text-muted fs-6 text-center mt-5">🚫 Tidak ada event tersedia.</p>
                 @endforelse
             </div>
         </div>
@@ -61,32 +65,43 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 <style>
-.scroll-wrapper {
-    display: flex;
-    gap: 15px;
-    flex-wrap: nowrap;
+/* ======== WRAPPER UTAMA ======== */
+.event-wrapper {
+    max-width: 100%;
+    padding-left: 6.5cm;
+    padding-right: 6.5cm;
+    margin-top: 40px;
+    margin-bottom: 100px; /* 🔹 Tambahkan jarak bawah agar tidak rapat dengan detail event */
 }
 
+/* ======== GRID EVENT ======== */
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 25px;
+}
+
+/* ======== KARTU EVENT ======== */
 .event-card-mini {
-    flex: 0 0 auto;
-    width: 200px; /* lebih besar */
     border-radius: 12px;
     overflow: hidden;
     background-color: #fff;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .event-card-mini:hover {
-    transform: translateY(-4px); /* naik sedikit lebih tinggi */
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
+/* ======== GAMBAR EVENT ======== */
 .card-photo {
-    height: 130px; /* lebih tinggi */
+    height: 150px;
     overflow: hidden;
     position: relative;
 }
@@ -99,8 +114,73 @@
 }
 
 .event-card-mini:hover img {
-    transform: scale(1.08); /* scale lebih besar */
+    transform: scale(1.08);
 }
 
+/* ======== KONTEN KARTU ======== */
+.card-content {
+    padding: 12px;
+}
+
+.price-section {
+    font-size: 0.9rem;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.final-price {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #03346E;
+}
+
+.btn-outline-primary {
+    border-radius: 8px;
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 1400px) {
+    .event-wrapper {
+        padding-left: 4cm;
+        padding-right: 4cm;
+        margin-bottom: 80px;
+    }
+}
+
+@media (max-width: 992px) {
+    .event-wrapper {
+        padding-left: 2cm;
+        padding-right: 2cm;
+        margin-bottom: 70px;
+    }
+
+    .event-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .event-wrapper {
+        padding-left: 1cm;
+        padding-right: 1cm;
+        margin-bottom: 60px;
+    }
+
+    .event-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
+    .card-photo {
+        height: 120px;
+    }
+
+    .final-price {
+        font-size: 0.9rem;
+    }
+}
 </style>
 @endpush
