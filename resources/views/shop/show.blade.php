@@ -23,7 +23,6 @@
     </div>
 </section>
 
-
 <!-- EVENT DETAIL + TICKET -->
 <div class="container py-4 px-3 px-md-4">
     <div class="row g-3">
@@ -87,7 +86,7 @@
         </div>
     </div>
 
-    <!-- EVENT SERUPA / GRID -->
+    <!-- EVENT SERUPA -->
     @if($relatedEvents && $relatedEvents->count())
     <div class="more-events-wrapper mt-4">
         <h4 class="fw-bold mb-3 text-dark text-center small">🎫 Event Serupa</h4>
@@ -100,33 +99,36 @@
                     $hasPromo = (bool) $promo;
                     $originalPrice = $hasPromo ? ($ticket->price + $promo->value) : $finalPrice;
                 @endphp
-                <div class="event-card-mini">
-                    <div class="card-photo">
-                        <img src="{{ $relEvent->poster ? asset('storage/' . $relEvent->poster) : asset('images/default-poster.jpg') }}" alt="{{ $relEvent->name }}">
-                        @if($relEvent->available_tickets <= 0)
-                            <span class="badge bg-danger position-absolute top-0 end-0 m-1 fs-7">Sold Out</span>
-                        @endif
-                        @if($hasPromo)
-                            <span class="badge bg-success position-absolute top-0 start-0 m-1 fs-7">{{ $promo->name }}</span>
-                        @endif
-                    </div>
-                    <div class="card-content d-flex flex-column p-1">
-                        <h6 class="fw-bold mb-1 small">{{ Str::limit($relEvent->name,20) }}</h6>
-                        <div class="price-section mb-1">
+
+                <a href="{{ route('shop.show', $relEvent->id) }}" class="event-link">
+                    <div class="event-card-mini">
+                        <div class="card-photo">
+                            <img src="{{ $relEvent->poster ? asset('storage/' . $relEvent->poster) : asset('images/default-poster.jpg') }}" 
+                                 alt="{{ $relEvent->name }}">
+                            @if($relEvent->available_tickets <= 0)
+                                <span class="badge bg-danger position-absolute top-0 end-0 m-1 fs-7">Sold Out</span>
+                            @endif
                             @if($hasPromo)
-                                <span class="original-price me-1">Rp {{ number_format($originalPrice,0,',','.') }}</span>
-                                <span class="final-price text-primary fw-bold">Rp {{ number_format($finalPrice,0,',','.') }}</span>
-                            @else
-                                <span class="final-price text-primary fw-bold">Rp {{ number_format($finalPrice,0,',','.') }}</span>
+                                <span class="badge bg-success position-absolute top-0 start-0 m-1 fs-7">{{ $promo->name }}</span>
                             @endif
                         </div>
-                        <p class="text-muted small mb-1 flex-grow-1">
-                            <i class="bi bi-calendar-event me-1"></i> {{ \Carbon\Carbon::parse($relEvent->date)->format('d M Y') }}<br>
-                            <i class="bi bi-geo-alt me-1"></i> {{ Str::limit($relEvent->location, 20) }}
-                        </p>
-                        <a href="{{ route('shop.show', $relEvent->id) }}" class="btn btn-outline-primary btn-sm mt-auto w-100 py-1 small">Lihat Event</a>
+                        <div class="card-content d-flex flex-column p-1">
+                            <h6 class="fw-bold mb-1 small">{{ Str::limit($relEvent->name, 20) }}</h6>
+                            <div class="price-section mb-1">
+                                @if($hasPromo)
+                                    <span class="original-price me-1">Rp {{ number_format($originalPrice, 0, ',', '.') }}</span>
+                                    <span class="final-price text-primary fw-bold">Rp {{ number_format($finalPrice, 0, ',', '.') }}</span>
+                                @else
+                                    <span class="final-price text-primary fw-bold">Rp {{ number_format($finalPrice, 0, ',', '.') }}</span>
+                                @endif
+                            </div>
+                            <p class="text-muted small mb-1 flex-grow-1">
+                                <i class="bi bi-calendar-event me-1"></i> {{ \Carbon\Carbon::parse($relEvent->date)->format('d M Y') }}<br>
+                                <i class="bi bi-geo-alt me-1"></i> {{ Str::limit($relEvent->location, 20) }}
+                            </p>
+                        </div>
                     </div>
-                </div>
+                </a>
             @endforeach
         </div>
     </div>
@@ -135,55 +137,56 @@
 
 @push('styles')
 <style>
-/* GENERAL CONTAINER PADDING */
 .container { max-width: 1200px; }
 
 /* HERO */
-/* HERO */
-.event-hero { 
-    position: relative; 
-    margin: 20px auto; 
-    max-width: calc(100% - 40px); /* ±2cm kiri-kanan */
-    border-radius: 12px; 
-    overflow: hidden; 
-}
+.event-hero { position: relative; margin: 20px auto; max-width: calc(100% - 40px); border-radius: 12px; overflow: hidden; }
 .hero-container { position: relative; width: 100%; height: 320px; border-radius:12px; overflow:hidden; }
 .hero-bg { width:100%; height:100%; object-fit:cover; filter:brightness(60%); transition: transform 0.3s ease; border-radius:12px; }
 .event-hero:hover .hero-bg { transform: scale(1.03); }
 .hero-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.7), transparent); border-radius:12px; }
 .hero-content { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); text-align:center; color:#fff; padding:0 15px; max-width: calc(100% - 40px); }
 
-/* CARDS */
-.event-detail-card, .ticket-section-card, .event-card-mini { background:#fff; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.08); }
-.ticket-section-card { padding:15px; }
-.ticket-card { padding:10px; border-radius:8px; margin-bottom:5px; position:relative; font-size:0.85rem; transition: all 0.3s ease; }
-.ticket-card:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,0.15); }
-.ticket-card .promo-tag { position:absolute; top:5px; left:5px; background:#28a745; color:#fff; padding:2px 6px; border-radius:3px; font-size:0.65rem; }
-
-/* MORE EVENTS GRID */
+/* EVENT SERUPA */
 .more-events-wrapper { margin-top:30px; margin-bottom:30px; }
 .more-events-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:12px; }
-.event-card-mini { display:flex; flex-direction:column; transition: transform 0.3s ease, box-shadow 0.3s ease; font-size:0.85rem; }
-.event-card-mini:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
-.card-photo { height:130px; overflow:hidden; position:relative; border-radius:8px 8px 0 0; }
-.card-photo img { width:100%; height:100%; object-fit:cover; transition: transform 0.3s ease; }
-.event-card-mini:hover img { transform: scale(1.03); }
+
+.event-link { text-decoration:none; color:inherit; display:block; }
+
+.event-card-mini {
+    display:flex;
+    flex-direction:column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-size:0.85rem;
+    border-radius:10px;
+    background-color:#fff;
+    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+    overflow:hidden;
+
+    /* border  */
+    border:2px solid transparent;
+    background-image:linear-gradient(#fff,#fff),linear-gradient(135deg,#000000,#c0c0c0,#1c3b63);
+    background-origin:border-box;
+    background-clip:content-box,border-box;
+}
+
+.event-card-mini:hover {
+    transform:translateY(-3px);
+    box-shadow:0 8px 20px rgba(255,215,0,0.3);
+    background-image:linear-gradient(#fff,#fff),linear-gradient(135deg,#000000,#FFD700,#FFB300);
+}
+
+.card-photo { height:130px; overflow:hidden; position:relative; }
+.card-photo img { width:100%; height:100%; object-fit:cover; transition:transform 0.3s ease; }
+.event-card-mini:hover img { transform:scale(1.05); }
+
 .card-content { padding:8px; }
 .price-section { font-size:0.8rem; }
 .original-price { text-decoration:line-through; color:#888; font-size:0.75rem; }
 .final-price { font-size:0.85rem; font-weight:bold; color:#03346E; }
-.btn-outline-primary { border-radius:6px; font-size:0.8rem; }
-
-/* INPUT SMALL */
-.ticket-qty.small-input { width:50px; height:28px; padding:0 4px; font-size:0.75rem; }
 
 /* RESPONSIVE */
-@media (max-width:992px) { 
-    .ticket-section-card { position:relative !important; top:0 !important; margin-bottom:20px; }
-}
-@media (max-width:768px) { 
-    .event-hero { height:200px; border-radius:10px; } 
-    .hero-content h1 { font-size:1.4rem; } 
-}
+@media (max-width:992px){ .ticket-section-card{ position:relative!important; top:0!important; margin-bottom:20px; } }
+@media (max-width:768px){ .event-hero{ height:200px; } .hero-content h1{ font-size:1.4rem; } }
 </style>
 @endpush

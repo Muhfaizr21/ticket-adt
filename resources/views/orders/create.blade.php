@@ -3,217 +3,243 @@
 @section('title', 'Buat Order Baru / Update')
 
 @section('content')
-<div class="container py-5" style="padding-left:2cm; padding-right:2cm;">
-    <h2 class="fw-bold mb-5 text-center" style="color:#03346E;">🛒 Buat Order Baru / Update</h2>
+<div class="container py-5" style="max-width: 1000px;">
+    <h2 class="fw-bold mb-5 text-center" style="color:#03346E;">
+        🛒 Buat Order Baru / Update
+    </h2>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+    {{-- ALERT --}}
+    @foreach (['success' => 'success', 'error' => 'danger'] as $key => $type)
+        @if(session($key))
+            <div class="alert alert-{{ $type }} alert-dismissible fade show shadow-sm mb-4">
+                {{ session($key) }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+    @endforeach
 
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <form action="{{ route('orders.store') }}" method="POST" class="card shadow-lg p-4 rounded-4 border-0">
-                @csrf
-                <input type="hidden" name="event_id" value="{{ $event->id }}">
-                <input type="hidden" name="order_id" value="{{ $order->id ?? '' }}">
+    {{-- FORM --}}
+    <div class="card border-0 shadow-lg p-4 rounded-4">
+        <form action="{{ route('orders.store') }}" method="POST">
+            @csrf
+            <input type="hidden" name="event_id" value="{{ $event->id }}">
+            <input type="hidden" name="order_id" value="{{ $order->id ?? '' }}">
 
-                @php
-                    use Carbon\Carbon;
-                    $today = Carbon::now();
-                @endphp
+            @php
+                use Carbon\Carbon;
+                $today = Carbon::now();
+            @endphp
 
-                {{-- Tipe Tiket --}}
-                <div class="mb-4">
-                    <label for="ticket_type_id" class="form-label fw-semibold">Tipe Tiket</label>
-                    <div class="row g-3">
-                        @foreach($event->ticketTypes as $ticket)
-                            @php
-                                $ticketPromos = $ticket->promotions ?? collect();
-                                $promo = $ticketPromos
-                                    ->where('is_active', 1)
-                                    ->where('start_date', '<=', $today)
-                                    ->where('end_date', '>=', $today)
-                                    ->first();
+            {{-- =============================
+                CARD: PILIH TIPE TIKET
+            ============================== --}}
+            <div class="form-section mb-5">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-header bg-primary text-white fw-bold fs-5 py-3">
+                        🎟️ Pilih Tiket
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            @foreach($event->ticketTypes as $ticket)
+                                @php
+                                    $promo = $ticket->promotions
+                                        ->where('is_active', 1)
+                                        ->where('start_date', '<=', $today)
+                                        ->where('end_date', '>=', $today)
+                                        ->first();
 
-                                $originalPrice = $ticket->price;
-                                $finalPrice = $originalPrice;
+                                    $originalPrice = $ticket->price;
+                                    $finalPrice = $promo
+                                        ? ($promo->persen_diskon
+                                            ? $originalPrice - ($originalPrice * $promo->persen_diskon / 100)
+                                            : $originalPrice - $promo->value)
+                                        : $originalPrice;
+                                @endphp
 
-                                if($promo) {
-                                    if($promo->persen_diskon) {
-                                        $finalPrice -= ($finalPrice * $promo->persen_diskon / 100);
-                                    } elseif($promo->value) {
-                                        $finalPrice -= $promo->value;
-                                    }
-                                }
-                            @endphp
-                            <div class="col-md-6">
-                                <div class="ticket-box card p-3 rounded-3 shadow-sm cursor-pointer 
-                                    {{ isset($order) && $order->ticket_type_id == $ticket->id ? 'active' : '' }}"
-                                    data-id="{{ $ticket->id }}">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="fw-semibold">{{ $ticket->name }}</span>
-                                        @if($promo)
-                                            <span class="badge bg-success text-white">{{ $promo->code }}</span>
-                                        @endif
-                                    </div>
-                                    <div class="mt-2">
-                                        @if($promo)
-                                            <span class="text-muted"><del>Rp {{ number_format($originalPrice,0,',','.') }}</del></span>
-                                        @endif
-                                        <strong class="text-primary fw-bold fs-6">Rp {{ number_format($finalPrice, 0, ',', '.') }}</strong>
-                                        <p class="mb-0 text-muted" style="font-size:0.85rem;">Tersisa: {{ $ticket->available_tickets }}</p>
+                                <div class="col-md-6">
+                                    <div class="ticket-box card p-3 shadow-sm border-0 cursor-pointer 
+                                        {{ isset($order) && $order->ticket_type_id == $ticket->id ? 'active' : '' }}"
+                                        data-id="{{ $ticket->id }}">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-semibold mb-0">{{ $ticket->name }}</h6>
+                                            @if($promo)
+                                                <span class="badge bg-success">{{ $promo->code }}</span>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            @if($promo)
+                                                <small class="text-muted d-block">
+                                                    <del>Rp {{ number_format($originalPrice,0,',','.') }}</del>
+                                                </small>
+                                            @endif
+                                            <span class="text-primary fw-bold fs-6">
+                                                Rp {{ number_format($finalPrice,0,',','.') }}
+                                            </span>
+                                            <div class="text-muted small mt-1">
+                                                Tersisa: {{ $ticket->available_tickets }} tiket
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
+                        <input type="hidden" name="ticket_type_id" id="ticket_type_id" required>
                     </div>
-                    <input type="hidden" name="ticket_type_id" id="ticket_type_id" required>
                 </div>
+            </div>
 
-                {{-- Jumlah Tiket --}}
-                <div class="mb-4">
-                    <label for="quantity" class="form-label fw-semibold">Jumlah Tiket</label>
-                    <input type="number" name="quantity" id="quantity" class="form-control form-control-lg shadow-sm" min="1"
-                        value="{{ $order->quantity ?? 1 }}" required>
+            {{-- JUMLAH TIKET --}}
+            <div class="form-section mb-5">
+                <label for="quantity" class="form-label fw-semibold text-dark mb-2">Jumlah Tiket</label>
+                <input type="number" name="quantity" id="quantity"
+                       class="form-control form-control-lg shadow-sm py-2"
+                       min="1" value="{{ $order->quantity ?? 1 }}" required>
+            </div>
+
+            {{-- KODE PROMO --}}
+            <div class="form-section mb-5">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-header bg-primary text-white fw-bold fs-5 py-3">
+                        🎁 Gunakan Kode Promo (Opsional)
+                    </div>
+                    <div class="card-body p-4">
+                        @php
+                            $activePromos = ($event->promotions ?? collect())
+                                ->where('is_active', 1)
+                                ->where('start_date', '<=', $today)
+                                ->where('end_date', '>=', $today);
+                        @endphp
+                        <select name="promo_code" id="promo_code"
+                                class="form-select form-select-lg shadow-sm py-2">
+                            <option value="">-- Pilih Kode Promo --</option>
+                            @foreach($activePromos as $promo)
+                                <option value="{{ $promo->code }}" {{ isset($order) && $order->promo_code == $promo->code ? 'selected' : '' }}>
+                                    {{ $promo->code }} ({{ $promo->name }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
+            </div>
 
-                {{-- Kode Promo --}}
-                <div class="mb-4">
-                    <label for="promo_code" class="form-label fw-semibold">Kode Promo (Opsional)</label>
-                    @php
-                        $eventPromos = $event->promotions ?? collect();
-                        $activePromos = $eventPromos
-                            ->where('is_active', 1)
-                            ->where('start_date', '<=', $today)
-                            ->where('end_date', '>=', $today);
-                    @endphp
-                    <select name="promo_code" id="promo_code" class="form-control form-control-lg shadow-sm">
-                        <option value="">-- Pilih Kode Promo --</option>
-                        @foreach($activePromos as $promo)
-                            <option value="{{ $promo->code }}" {{ (isset($order) && $order->promo_code == $promo->code) ? 'selected' : '' }}>
-                                {{ $promo->code }} ({{ $promo->name }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- Metode Pembayaran --}}
-                <div class="mb-4">
-                    <label class="form-label fw-semibold">Metode Pembayaran</label>
-                    <div class="row g-3">
-                        @foreach($paymentMethods as $method)
-                            <div class="col-md-6">
-                                <div class="payment-box card p-3 rounded-3 shadow-sm cursor-pointer 
-                                    {{ isset($order) && $order->payment && $order->payment->method_id == $method->id ? 'active' : '' }}"
-                                    data-id="{{ $method->id }}">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="fw-semibold">{{ $method->name }}</span>
-                                        @if($method->type === 'qris')
-                                            <span class="badge bg-success text-white">QRIS</span>
-                                        @endif
-                                    </div>
-                                    <div class="payment-details" style="display:none;">
-                                        @if($method->type === 'bank')
-                                            <p class="mb-1"><strong>No. Rekening:</strong> {{ $method->account_number }}</p>
-                                            <p class="mb-1"><strong>Atas Nama:</strong> {{ $method->account_name }}</p>
-                                            <p class="mb-0 text-muted" style="font-size:0.85rem;">Silakan transfer sesuai nominal order.</p>
-                                        @elseif($method->type === 'qris')
-                                            <p class="mb-1"><strong>Scan QRIS berikut untuk membayar:</strong></p>
-                                            <img src="{{ $method->qr_code_image ? asset('storage/' . $method->qr_code_image) : '' }}" alt="QRIS" class="img-fluid mt-2 rounded" style="max-width:150px;">
-                                            <p class="mb-0 text-muted" style="font-size:0.85rem;">Scan dan lakukan pembayaran sesuai nominal order.</p>
-                                        @elseif($method->type === 'ewallet')
-                                            <p class="mb-1"><strong>Nomor / ID:</strong> {{ $method->account_number ?? '-' }}</p>
-                                            <p class="mb-0 text-muted" style="font-size:0.85rem;">Gunakan e-wallet Anda untuk membayar.</p>
-                                        @endif
+            {{-- =============================
+                CARD: PILIH METODE PEMBAYARAN
+            ============================== --}}
+            <div class="form-section mb-5">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-header bg-primary text-white fw-bold fs-5 py-3">
+                        💳 Pilih Metode Pembayaran
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+                            @foreach($paymentMethods as $method)
+                                <div class="col-md-6">
+                                    <div class="payment-box card p-3 shadow-sm border-0 cursor-pointer 
+                                        {{ isset($order) && $order->payment && $order->payment->method_id == $method->id ? 'active' : '' }}"
+                                        data-id="{{ $method->id }}">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="fw-semibold mb-0">{{ $method->name }}</h6>
+                                            @if($method->type === 'qris')
+                                                <span class="badge bg-success">QRIS</span>
+                                            @endif
+                                        </div>
+                                        <div class="payment-details" style="display:none;">
+                                            @if($method->type === 'bank')
+                                                <p class="mb-1"><strong>No. Rekening:</strong> {{ $method->account_number }}</p>
+                                                <p class="mb-1"><strong>Atas Nama:</strong> {{ $method->account_name }}</p>
+                                                <small class="text-muted">Transfer sesuai nominal order.</small>
+                                            @elseif($method->type === 'qris')
+                                                <p class="mb-1"><strong>Scan QRIS:</strong></p>
+                                                <img src="{{ $method->qr_code_image ? asset('storage/' . $method->qr_code_image) : '' }}"
+                                                     alt="QRIS" class="img-fluid mt-2 rounded" style="max-width:150px;">
+                                            @elseif($method->type === 'ewallet')
+                                                <p class="mb-1"><strong>Nomor / ID:</strong> {{ $method->account_number ?? '-' }}</p>
+                                                <small class="text-muted">Gunakan e-wallet Anda untuk membayar.</small>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
+                        <input type="hidden" name="payment_method" id="payment_method">
                     </div>
-                    <input type="hidden" name="payment_method" id="payment_method">
                 </div>
+            </div>
 
-                <button type="submit" class="btn btn-primary btn-lg w-100 mt-3 shadow-sm" style="background: linear-gradient(45deg,#03346E,#2575FC); border:none;">
+            {{-- SUBMIT --}}
+            <div class="text-center mt-5">
+                <button type="submit"
+                        class="btn btn-primary btn-lg w-100 py-3 shadow-sm rounded-3 fw-semibold"
+                        style="background: linear-gradient(45deg,#aebac9,#2575FC); border:none;">
                     <i class="bi bi-cart-fill me-2"></i> Buat Order
                 </button>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 </div>
 
 @push('styles')
 <style>
-/* Animasi & Tampilan Elegan */
+.form-section {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
 .ticket-box, .payment-box {
-    cursor:pointer;
+    cursor: pointer;
     transition: all 0.3s ease-in-out;
-    border:1px solid transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background-color: #fff;
 }
 .ticket-box:hover, .payment-box:hover {
-    transform: translateY(-4px);
-    box-shadow:0 8px 20px rgba(0,0,0,0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 .ticket-box.active, .payment-box.active {
-    border:2px solid #03346E;
-    box-shadow:0 10px 25px rgba(0,0,0,0.25);
-    background: linear-gradient(135deg,#e0f2ff,#f0f8ff);
+    border: 2px solid #03346E;
+    background: linear-gradient(135deg,#e9f3ff,#f8fbff);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
 }
-.ticket-box .badge, .payment-box .badge {
-    font-size:0.75rem;
+.payment-details {
+    border-top: 1px dashed #ccc;
+    padding-top: 8px;
+    margin-top: 6px;
+    font-size: 0.85rem;
 }
-del { color:#999; margin-right:5px; }
+.cursor-pointer { cursor: pointer; }
+.card-header {
+    background: linear-gradient(90deg,#aebac9,#0056D2);
+}
 </style>
 @endpush
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     // Pilih tiket
-    const tickets = document.querySelectorAll('.ticket-box');
+    const ticketBoxes = document.querySelectorAll('.ticket-box');
     const ticketInput = document.getElementById('ticket_type_id');
-    tickets.forEach(box => {
+    ticketBoxes.forEach(box => {
         box.addEventListener('click', function() {
-            tickets.forEach(b => b.classList.remove('active'));
+            ticketBoxes.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             ticketInput.value = this.dataset.id;
         });
-        @if(isset($order) && $order->ticket_type_id)
-            if(this.dataset.id == "{{ $order->ticket_type_id }}") {
-                this.classList.add('active');
-                ticketInput.value = this.dataset.id;
-            }
-        @endif
     });
 
-    // Pilih pembayaran
-    const boxes = document.querySelectorAll('.payment-box');
-    const hiddenInput = document.getElementById('payment_method');
-    boxes.forEach(box => {
+    // Pilih metode pembayaran
+    const paymentBoxes = document.querySelectorAll('.payment-box');
+    const paymentInput = document.getElementById('payment_method');
+    paymentBoxes.forEach(box => {
         box.addEventListener('click', function() {
-            boxes.forEach(b => b.classList.remove('active'));
+            paymentBoxes.forEach(b => {
+                b.classList.remove('active');
+                b.querySelector('.payment-details').style.display = 'none';
+            });
             this.classList.add('active');
-            hiddenInput.value = this.dataset.id;
-
-            boxes.forEach(b => b.querySelector('.payment-details').style.display = 'none');
             this.querySelector('.payment-details').style.display = 'block';
+            paymentInput.value = this.dataset.id;
         });
-
-        @if(isset($order) && $order->payment)
-            if(this.dataset.id == "{{ $order->payment->method_id }}") {
-                this.classList.add('active');
-                this.querySelector('.payment-details').style.display = 'block';
-                hiddenInput.value = this.dataset.id;
-            }
-        @endif
     });
 });
 </script>

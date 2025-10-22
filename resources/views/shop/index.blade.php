@@ -27,31 +27,33 @@
                     @endphp
 
                     <div class="event-card-mini">
-                        <div class="card-photo">
-                            <img src="{{ $event->poster ? asset('storage/' . $event->poster) : asset('images/default-poster.jpg') }}" alt="{{ $event->name }}">
-                            @if($event->available_tickets <= 0)
-                                <span class="badge bg-danger position-absolute top-0 end-0 m-1 fs-6">Sold Out</span>
-                            @endif
-                            @if($hasPromo)
-                                <span class="badge bg-success position-absolute top-0 start-0 m-1 fs-6">{{ $promotion->name }}</span>
-                            @endif
-                        </div>
-                        <div class="card-content d-flex flex-column p-2">
-                            <h6 class="fw-bold mb-1">{{ Str::limit($event->name, 20) }}</h6>
-                            <div class="price-section mb-1">
+                        <a href="{{ route('shop.show', $event->id) }}" class="event-link">
+                            <div class="card-photo">
+                                <img src="{{ $event->poster ? asset('storage/' . $event->poster) : asset('images/default-poster.jpg') }}" 
+                                     alt="{{ $event->name }}">
+                                @if($event->available_tickets <= 0)
+                                    <span class="badge bg-danger position-absolute top-0 end-0 m-1 fs-6">Sold Out</span>
+                                @endif
                                 @if($hasPromo)
-                                    <span class="original-price me-1">Rp {{ number_format($originalPrice, 0, ',', '.') }}</span>
-                                    <span class="final-price text-primary fw-bold">Rp {{ number_format($finalPrice, 0, ',', '.') }}</span>
-                                @else
-                                    <span class="final-price text-primary fw-bold">Rp {{ number_format($finalPrice, 0, ',', '.') }}</span>
+                                    <span class="badge bg-success position-absolute top-0 start-0 m-1 fs-6">{{ $promotion->name }}</span>
                                 @endif
                             </div>
-                            <p class="text-muted small mb-2 flex-grow-1">
-                                <i class="bi bi-calendar-event me-1"></i> {{ \Carbon\Carbon::parse($event->date)->format('d M Y') }}<br>
-                                <i class="bi bi-geo-alt me-1"></i> {{ Str::limit($event->location, 20) }}
-                            </p>
-                            <a href="{{ route('shop.show', $event->id) }}" class="btn btn-outline-primary btn-sm mt-auto w-100">Pilih</a>
-                        </div>
+                            <div class="card-content d-flex flex-column p-2">
+                                <h6 class="fw-bold mb-1">{{ Str::limit($event->name, 20) }}</h6>
+                                <div class="price-section mb-1">
+                                    @if($hasPromo)
+                                        <span class="original-price me-1">Rp {{ number_format($originalPrice, 0, ',', '.') }}</span>
+                                        <span class="final-price text-primary fw-bold">Rp {{ number_format($finalPrice, 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="final-price text-primary fw-bold">Rp {{ number_format($finalPrice, 0, ',', '.') }}</span>
+                                    @endif
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    <i class="bi bi-calendar-event me-1"></i> {{ \Carbon\Carbon::parse($event->date)->format('d M Y') }}<br>
+                                    <i class="bi bi-geo-alt me-1"></i> {{ Str::limit($event->location, 20) }}
+                                </p>
+                            </div>
+                        </a>
                     </div>
                 @empty
                     <p class="text-muted fs-6 text-center mt-5">🚫 Tidak ada event tersedia.</p>
@@ -82,6 +84,13 @@
     gap: 25px;
 }
 
+/* ======== LINK CARD ======== */
+.event-link {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+}
+
 /* ======== KARTU EVENT ======== */
 .event-card-mini {
     border-radius: 12px;
@@ -90,13 +99,9 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.event-card-mini:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+    
+    /* Tambahan border gold elegan */ border: 2px solid transparent; background-image: linear-gradient(#fff, #fff), linear-gradient(135deg, #274b74, #d4d4d4, #000000); background-origin: border-box; background-clip: content-box, border-box; } .event-card-mini:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); border: 2px solid transparent; background-image: linear-gradient(#fff, #fff), linear-gradient(135deg, #000000, #ffffff, #006eff); }
 
 /* ======== GAMBAR EVENT ======== */
 .card-photo {
@@ -135,10 +140,6 @@
     font-size: 1rem;
     font-weight: bold;
     color: #03346E;
-}
-
-.btn-outline-primary {
-    border-radius: 8px;
 }
 
 /* ======== RESPONSIVE ======== */
