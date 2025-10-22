@@ -1,3 +1,17 @@
+@php
+    use App\Models\Order;
+    use Illuminate\Support\Facades\Auth;
+
+
+    // Hitung jumlah tiket (order) user yang sedang login
+    $basketCount = 0;
+    if (Auth::check()) {
+        $basketCount = Order::where('user_id', Auth::id())
+            ->where('status', 'pending') // sesuaikan: pending / unpaid / in_cart
+            ->count();
+    }
+@endphp
+
 <header class="topbar">
     <div class="container">
         <div class="topbar-content">
@@ -42,7 +56,7 @@
                 </ul>
             </nav>
 
-            <!-- Tambahkan di dalam .topbar-actions sebelum basket -->
+            <!-- Search Box -->
             <div class="search-box">
                 <form action="{{ route('events.search') }}" method="GET" class="search-form">
                     <input type="text" name="q" placeholder="Search events..." value="{{ request('q') }}">
@@ -65,7 +79,7 @@
                 <div class="basket">
                     <a href="{{ route('orders.index') }}" class="basket-link">
                         <i class="bi bi-bag"></i>
-                        <span class="basket-count">0</span>
+                        <span class="basket-count">{{ $basketCount }}</span>
                     </a>
                 </div>
 
