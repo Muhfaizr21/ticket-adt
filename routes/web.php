@@ -34,6 +34,7 @@ use App\Http\Controllers\Admin\AdminNewsController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\TicketCheckInController;
 use App\Http\Controllers\Admin\PaymentMethodController;
+use App\Http\Controllers\Admin\AdminContactController;
 
 // =========================
 // 🌟 PUBLIC ROUTES
@@ -195,3 +196,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'isAdmin'])->group(f
     // 📰 News
     Route::resource('news', AdminNewsController::class);
 });
+
+Route::prefix('admin')->middleware(['auth','isAdmin'])->group(function(){
+    Route::get('/contacts', [AdminContactController::class,'index'])->name('admin.contacts.index');
+    Route::get('/contacts/{id}', [AdminContactController::class,'show'])->name('admin.contacts.show');
+    Route::delete('/contacts/{id}', [AdminContactController::class,'destroy'])->name('admin.contacts.destroy');
+});
+

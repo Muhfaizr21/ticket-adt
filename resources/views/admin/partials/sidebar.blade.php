@@ -83,6 +83,14 @@
                     </a>
                 </li>
                 <li class="menu-item">
+    <a href="{{ route('admin.contacts.index') }}"
+        class="menu-link {{ request()->is('admin/contacts*') ? 'active' : '' }}">
+        <i class="bi bi-envelope-fill menu-icon"></i>
+        <span class="menu-text">Aduan Pengguna</span>
+    </a>
+</li>
+
+                <li class="menu-item">
                     <a href="{{ route('admin.payment_methods.index') }}"
                         class="menu-link {{ request()->is('admin/payment_methods*') ? 'active' : '' }}">
                         <i class="bi bi-credit-card-2-front-fill menu-icon"></i>
