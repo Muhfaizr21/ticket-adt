@@ -2,9 +2,15 @@
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Str;
     use App\Models\Notification;
+    use App\Models\Contact;
 
+    // === NOTIFIKASI ===
     $unreadCount = Notification::where('is_read', false)->count();
     $latestNotifications = Notification::orderBy('created_at', 'desc')->take(5)->get();
+
+    // === PESAN (CONTACT / ADUAN) ===
+    $unreadMessagesCount = Contact::whereNull('read_at')->count();
+    $latestMessages = Contact::orderBy('created_at', 'desc')->take(5)->get();
 @endphp
 
 <header class="topbar d-flex justify-content-between align-items-center px-3 py-2 bg-white border-bottom shadow-sm">
@@ -47,7 +53,7 @@
                 @forelse($latestNotifications as $notif)
                     <li class="px-3 py-2 {{ $notif->is_read ? '' : 'bg-light' }}">
                         <div class="d-flex justify-content-between align-items-start">
-                            <div style="word-break: break-word; white-space: normal;">
+                            <div style="word-break: break-word;">
                                 <div class="fw-semibold"><i class="bi bi-info-circle me-1"></i>
                                     {{ $notif->title ?? 'Notifikasi' }}</div>
                                 <small class="text-muted d-block">{{ $notif->message }}</small>
@@ -62,7 +68,6 @@
                 @empty
                     <li class="px-3 py-2 text-center text-muted">Tidak ada notifikasi</li>
                 @endforelse
-
                 <li>
                     <hr class="dropdown-divider">
                 </li>
@@ -78,56 +83,118 @@
             <button class="btn btn-link p-0 position-relative dropdown-toggle-js" data-target="messageMenu"
                 aria-expanded="false" title="Messages">
                 <i class="bi bi-envelope-fill fs-5"></i>
-                <span class="notification-badge">5</span>
+                @if($unreadMessagesCount > 0)
+                    <span class="notification-badge">{{ $unreadMessagesCount }}</span>
+                @endif
             </button>
             <ul id="messageMenu" class="dropdown-menu dropdown-menu-end shadow dropdown-animated">
-                <li class="px-3 py-2"><strong><i class="bi bi-envelope me-2"></i> Messages</strong></li>
+                <li class="px-3 py-2 d-flex justify-content-between align-items-center">
+                    <strong><i class="bi bi-envelope me-2"></i> Pesan Masuk</strong>
+                    @if($unreadMessagesCount > 0)
+                        <a href="{{ route('admin.contacts.index') }}" class="text-primary small">Lihat semua</a>
+                    @endif
+                </li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
-                <li class="px-3 py-2 text-center text-muted">Belum ada pesan baru</li>
+                @forelse($latestMessages as $msg)
+                    <li class="px-3 py-2 {{ $msg->read_at ? '' : 'bg-light' }}">
+                        <a href="{{ route('admin.contacts.show', $msg->id) }}"
+                            class="d-block text-decoration-none text-dark">
+                            <div class="fw-semibold"><i class="bi bi-person me-1"></i> {{ Str::limit($msg->name, 20) }}
+                            </div>
+                            <small class="text-muted d-block">{{ Str::limit($msg->subject, 40) }}</small>
+                            <small class="text-muted">{{ $msg->created_at->diffForHumans() }}</small>
+                        </a>
+                    </li>
+                @empty
+                    <li class="px-3 py-2 text-center text-muted">Belum ada pesan baru</li>
+                @endforelse
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li class="text-center">
+                    <a href="{{ route('admin.contacts.index') }}" class="dropdown-item text-primary fw-semibold"><i
+                            class="bi bi-eye me-1"></i> Lihat semua pesan</a>
+                </li>
             </ul>
         </div>
 
         <!-- User -->
-        <div class="dropdown" data-dropdown>
-            <button class="btn btn-link p-0 d-flex align-items-center dropdown-toggle-js" data-target="userMenu"
-                aria-expanded="false">
-                <div class="user-avatar-sm me-2">
-                    @if(Auth::user()->avatar)
-                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="avatar-img">
-                    @else
-                        {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
-                    @endif
-                </div>
-                <div class="text-start">
-                    <div class="user-name-sm fw-semibold">{{ Auth::user()->name }}</div>
-                    <div class="user-role-sm text-muted small">{{ ucfirst(Auth::user()->role) }}</div>
-                </div>
-                <i class="bx bx-chevron-down ms-2"></i>
-            </button>
-
-            <ul id="userMenu" class="dropdown-menu dropdown-menu-end shadow dropdown-animated">
-                <li><a href="{{ route('admin.profile.index') }}" class="dropdown-item"><i class="bx bx-user me-2"></i>
-                        My Profile</a></li>
-                <li><a href="{{ route('admin.settings.edit') }}" class="dropdown-item"><i class="bx bx-cog me-2"></i>
-                        Settings</a></li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li>
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="dropdown-item"><i class="bx bx-log-out me-2"></i> Logout</button>
-                    </form>
-                </li>
-            </ul>
+        <!-- USER DROPDOWN (Bootstrap Icons version) -->
+<div class="dropdown" data-dropdown>
+    <button class="btn btn-link p-0 d-flex align-items-center dropdown-toggle-js" data-target="userMenu"
+        aria-expanded="false">
+        <div class="user-avatar-sm me-2">
+            @if(Auth::user()->avatar)
+                <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar" class="avatar-img">
+            @else
+                {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+            @endif
         </div>
+        <div class="text-start">
+            <div class="user-name-sm fw-semibold">{{ Auth::user()->name }}</div>
+            <div class="user-role-sm text-muted small">{{ ucfirst(Auth::user()->role) }}</div>
+        </div>
+        <i class="bi bi-chevron-down ms-2"></i>
+    </button>
+
+    <ul id="userMenu" class="dropdown-menu dropdown-menu-end shadow dropdown-animated">
+        <li>
+            <a href="{{ route('admin.profile.index') }}" class="dropdown-item">
+                <i class="bi bi-person-circle me-2"></i> My Profile
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.settings.edit') }}" class="dropdown-item">
+                <i class="bi bi-gear-fill me-2"></i> Settings
+            </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="dropdown-item">
+                    <i class="bi bi-box-arrow-right me-2"></i> Logout
+                </button>
+            </form>
+        </li>
+    </ul>
+</div>
 
     </div>
 </header>
 
 <style>
+    /* Hilangkan titik-titik dari list menu dropdown */
+    .dropdown-menu li {
+        list-style: none;
+    }
+
+    /* Hilangkan margin/padding default agar rapi */
+    .dropdown-menu {
+        padding-left: 0;
+    }
+
+    /* Atur icon agar sejajar dan muncul */
+    .dropdown-menu i.bi {
+        font-size: 1rem;
+        vertical-align: middle;
+        margin-right: 6px;
+    }
+
+    /* Pastikan list item rapi */
+    .dropdown-menu li a,
+    .dropdown-menu li div {
+        display: block;
+        color: #333;
+    }
+
+    /* Tambahkan hover effect biar enak dilihat */
+    .dropdown-menu li:hover {
+        background-color: #f8f9fa;
+    }
+
     .topbar {
         position: sticky;
         top: 0;
@@ -188,7 +255,6 @@
         outline: none;
     }
 
-    /* Dropdown Fix */
     .dropdown {
         position: relative;
     }
@@ -199,7 +265,7 @@
         top: 100%;
         right: 0;
         z-index: 2000;
-        min-width: 250px;
+        min-width: 260px;
         border-radius: 10px;
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
         background: #fff;
@@ -211,8 +277,6 @@
         display: block;
         opacity: 1;
     }
-
-    
 
     .dropdown-animated {
         animation-duration: 0.25s;
